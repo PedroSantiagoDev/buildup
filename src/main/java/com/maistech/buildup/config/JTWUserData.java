@@ -2,9 +2,11 @@ package com.maistech.buildup.config;
 
 import lombok.Builder;
 
+import java.util.UUID;
+
 @Builder
 public record JTWUserData(
-        Long userId,
+        UUID userId,
         String email
 ) {
 }
