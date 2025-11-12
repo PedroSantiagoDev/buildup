@@ -23,7 +23,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class LoginIntegrationTest {
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
+        "postgres:16-alpine"
+    );
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -46,18 +48,25 @@ class LoginIntegrationTest {
     @Test
     void shouldLoginSuccessfullyWithValidCredentials() {
         RegisterUserRequest registerRequest = new RegisterUserRequest(
-                "John Doe",
-                "john@example.com",
-                "password123"
+            "John Doe",
+            "john@example.com",
+            "password123"
         );
-        restTemplate.postForEntity("/auth/register", registerRequest, Object.class);
+        restTemplate.postForEntity(
+            "/auth/register",
+            registerRequest,
+            Object.class
+        );
 
-        LoginRequest loginRequest = new LoginRequest("john@example.com", "password123");
+        LoginRequest loginRequest = new LoginRequest(
+            "john@example.com",
+            "password123"
+        );
 
         ResponseEntity<LoginResponse> response = restTemplate.postForEntity(
-                "/auth/login",
-                loginRequest,
-                LoginResponse.class
+            "/auth/login",
+            loginRequest,
+            LoginResponse.class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

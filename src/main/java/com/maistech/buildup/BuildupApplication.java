@@ -11,5 +11,4 @@ public class BuildupApplication {
     public static void main(String[] args) {
         SpringApplication.run(BuildupApplication.class, args);
     }
-
 }

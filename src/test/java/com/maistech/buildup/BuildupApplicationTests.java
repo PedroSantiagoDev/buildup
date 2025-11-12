@@ -13,7 +13,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class BuildupApplicationTests {
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
+        "postgres:16-alpine"
+    );
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -23,7 +25,5 @@ class BuildupApplicationTests {
     }
 
     @Test
-    void contextLoads() {
-    }
-
+    void contextLoads() {}
 }

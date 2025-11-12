@@ -1,12 +1,7 @@
 package com.maistech.buildup.shared.config;
 
+import java.util.UUID;
 import lombok.Builder;
 
-import java.util.UUID;
-
 @Builder
-public record JTWUserData(
-        UUID userId,
-        String email
-) {
-}
+public record JTWUserData(UUID userId, String email) {}

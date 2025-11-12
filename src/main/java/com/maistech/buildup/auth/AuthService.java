@@ -23,10 +23,10 @@ public class AuthService {
     private final TokenConfig tokenConfig;
 
     public AuthService(
-            UserRepository userRepository,
-            PasswordEncoder passwordEncoder,
-            AuthenticationManager authenticationManager,
-            TokenConfig tokenConfig
+        UserRepository userRepository,
+        PasswordEncoder passwordEncoder,
+        AuthenticationManager authenticationManager,
+        TokenConfig tokenConfig
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -36,8 +36,8 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request) {
         var credentials = new UsernamePasswordAuthenticationToken(
-                request.email(),
-                request.password()
+            request.email(),
+            request.password()
         );
 
         var authentication = authenticationManager.authenticate(credentials);
@@ -55,15 +55,15 @@ public class AuthService {
         var savedUser = userRepository.save(user);
 
         return new RegisterUserResponse(
-                savedUser.getName(),
-                savedUser.getEmail()
+            savedUser.getName(),
+            savedUser.getEmail()
         );
     }
 
     private void validateUserDoesNotExist(String email) {
         if (userRepository.existsByEmail(email)) {
             throw new UserAlreadyExistsException(
-                    "User with email " + email + " already exists"
+                "User with email " + email + " already exists"
             );
         }
     }
@@ -71,7 +71,7 @@ public class AuthService {
     private void validatePasswordStrength(String password) {
         if (password == null || password.length() < 8) {
             throw new InvalidPasswordException(
-                    "Password must be at least 8 characters"
+                "Password must be at least 8 characters"
             );
         }
     }

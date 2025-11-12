@@ -41,14 +41,22 @@ class AuthServiceTest {
 
     @Test
     void shouldLoginSuccessfullyWithValidCredentials() {
-        LoginRequest request = new LoginRequest("john@example.com", "password123");
+        LoginRequest request = new LoginRequest(
+            "john@example.com",
+            "password123"
+        );
 
         UserEntity user = new UserEntity();
         user.setEmail("john@example.com");
         user.setName("John Doe");
 
-        Authentication authentication = new UsernamePasswordAuthenticationToken(user, null);
-        when(authenticationManager.authenticate(any())).thenReturn(authentication);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+            user,
+            null
+        );
+        when(authenticationManager.authenticate(any())).thenReturn(
+            authentication
+        );
         when(tokenConfig.generateToken(user)).thenReturn("mock-jwt-token");
 
         var response = authService.login(request);
@@ -63,13 +71,18 @@ class AuthServiceTest {
 
     @Test
     void shouldThrowExceptionWhenCredentialsAreInvalid() {
-        LoginRequest request = new LoginRequest("john@example.com", "wrongpassword");
+        LoginRequest request = new LoginRequest(
+            "john@example.com",
+            "wrongpassword"
+        );
 
-        when(authenticationManager.authenticate(any()))
-                .thenThrow(new BadCredentialsException("Bad credentials"));
+        when(authenticationManager.authenticate(any())).thenThrow(
+            new BadCredentialsException("Bad credentials")
+        );
 
-        assertThatThrownBy(() -> authService.login(request))
-                .isInstanceOf(BadCredentialsException.class);
+        assertThatThrownBy(() -> authService.login(request)).isInstanceOf(
+            BadCredentialsException.class
+        );
 
         verify(authenticationManager).authenticate(any());
     }
@@ -77,16 +90,16 @@ class AuthServiceTest {
     @Test
     void shouldThrowExceptionWhenEmailAlreadyExists() {
         RegisterUserRequest request = new RegisterUserRequest(
-                "John Doe",
-                "john@example.com",
-                "password123"
+            "John Doe",
+            "john@example.com",
+            "password123"
         );
 
         when(userRepository.existsByEmail("john@example.com")).thenReturn(true);
 
         assertThatThrownBy(() -> authService.register(request))
-                .isInstanceOf(UserAlreadyExistsException.class)
-                .hasMessageContaining("john@example.com");
+            .isInstanceOf(UserAlreadyExistsException.class)
+            .hasMessageContaining("john@example.com");
 
         verify(userRepository).existsByEmail("john@example.com");
         verify(userRepository, never()).save(any());
@@ -95,13 +108,17 @@ class AuthServiceTest {
     @Test
     void shouldRegisterUserWhenEmailDoesNotExist() {
         RegisterUserRequest request = new RegisterUserRequest(
-                "John Doe",
-                "john@example.com",
-                "password123"
+            "John Doe",
+            "john@example.com",
+            "password123"
         );
 
-        when(userRepository.existsByEmail("john@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
+        when(userRepository.existsByEmail("john@example.com")).thenReturn(
+            false
+        );
+        when(passwordEncoder.encode("password123")).thenReturn(
+            "encodedPassword"
+        );
 
         UserEntity savedUser = new UserEntity();
         savedUser.setName("John Doe");
@@ -123,16 +140,18 @@ class AuthServiceTest {
     @Test
     void shouldThrowExceptionWhenPasswordIsTooShort() {
         RegisterUserRequest request = new RegisterUserRequest(
-                "John Doe",
-                "john@example.com",
-                "short"
+            "John Doe",
+            "john@example.com",
+            "short"
         );
 
-        when(userRepository.existsByEmail("john@example.com")).thenReturn(false);
+        when(userRepository.existsByEmail("john@example.com")).thenReturn(
+            false
+        );
 
         assertThatThrownBy(() -> authService.register(request))
-                .isInstanceOf(InvalidPasswordException.class)
-                .hasMessageContaining("at least 8 characters");
+            .isInstanceOf(InvalidPasswordException.class)
+            .hasMessageContaining("at least 8 characters");
 
         verify(userRepository).existsByEmail("john@example.com");
         verify(userRepository, never()).save(any());
