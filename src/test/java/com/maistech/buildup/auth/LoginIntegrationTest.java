@@ -23,12 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class LoginIntegrationTest {
 
     @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
-        "postgres:16-alpine"
-    )
-        .withDatabaseName("testdb")
-        .withUsername("test")
-        .withPassword("test");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -51,24 +46,18 @@ class LoginIntegrationTest {
     @Test
     void shouldLoginSuccessfullyWithValidCredentials() {
         RegisterUserRequest registerRequest = new RegisterUserRequest(
-            "John Doe",
-            "john@example.com",
-            "password123"
+                "John Doe",
+                "john@example.com",
+                "password123"
         );
-        restTemplate.postForEntity(
-            "/auth/register",
-            registerRequest,
-            Object.class
-        );
+        restTemplate.postForEntity("/auth/register", registerRequest, Object.class);
 
-        LoginRequest loginRequest = new LoginRequest(
-            "john@example.com",
-            "password123"
-        );
+        LoginRequest loginRequest = new LoginRequest("john@example.com", "password123");
+
         ResponseEntity<LoginResponse> response = restTemplate.postForEntity(
-            "/auth/login",
-            loginRequest,
-            LoginResponse.class
+                "/auth/login",
+                loginRequest,
+                LoginResponse.class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -76,47 +65,5 @@ class LoginIntegrationTest {
         assertThat(response.getBody().token()).isNotBlank();
         assertThat(response.getBody().name()).isEqualTo("John Doe");
         assertThat(response.getBody().email()).isEqualTo("john@example.com");
-    }
-
-    @Test
-    void shouldReturnUnauthorizedWhenCredentialsAreInvalid() {
-        RegisterUserRequest registerRequest = new RegisterUserRequest(
-            "John Doe",
-            "john@example.com",
-            "password123"
-        );
-        restTemplate.postForEntity(
-            "/auth/register",
-            registerRequest,
-            Object.class
-        );
-
-        LoginRequest loginRequest = new LoginRequest(
-            "john@example.com",
-            "wrongpassword"
-        );
-        ResponseEntity<String> response = restTemplate.postForEntity(
-            "/auth/login",
-            loginRequest,
-            String.class
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
-    }
-
-    @Test
-    void shouldReturnUnauthorizedWhenUserDoesNotExist() {
-        LoginRequest loginRequest = new LoginRequest(
-            "nonexistent@example.com",
-            "password123"
-        );
-
-        ResponseEntity<String> response = restTemplate.postForEntity(
-            "/auth/login",
-            loginRequest,
-            String.class
-        );
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 }

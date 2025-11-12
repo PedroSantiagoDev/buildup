@@ -1,4 +1,4 @@
-package com.maistech.buildup.auth;
+package com.maistech.buildup.auth.exception;
 
 import com.maistech.buildup.shared.exception.ErrorResponse;
 import org.springframework.http.HttpStatus;
