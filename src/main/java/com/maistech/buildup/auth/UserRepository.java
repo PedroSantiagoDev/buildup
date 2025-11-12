@@ -1,6 +1,5 @@
-package com.maistech.buildup.repository;
+package com.maistech.buildup.auth;
 
-import com.maistech.buildup.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

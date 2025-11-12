@@ -1,4 +1,4 @@
-package com.maistech.buildup.config;
+package com.maistech.buildup.shared.config;
 
 import lombok.Builder;
 

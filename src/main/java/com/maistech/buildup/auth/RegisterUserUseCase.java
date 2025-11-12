@@ -1,10 +1,7 @@
-package com.maistech.buildup.usecase;
+package com.maistech.buildup.auth;
 
-import com.maistech.buildup.dto.request.RegisterUserRequest;
-import com.maistech.buildup.dto.response.RegisterUserResponse;
-import com.maistech.buildup.entity.UserEntity;
-import com.maistech.buildup.exception.UserAlreadyExistsException;
-import com.maistech.buildup.repository.UserRepository;
+import com.maistech.buildup.auth.dto.RegisterUserRequest;
+import com.maistech.buildup.auth.dto.RegisterUserResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,4 +44,3 @@ public class RegisterUserUseCase {
         return user;
     }
 }
-

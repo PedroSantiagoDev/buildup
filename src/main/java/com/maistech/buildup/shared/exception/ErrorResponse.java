@@ -1,4 +1,4 @@
-package com.maistech.buildup.dto.response;
+package com.maistech.buildup.shared.exception;
 
 import java.time.LocalDateTime;
 

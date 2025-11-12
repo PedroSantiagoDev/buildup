@@ -13,3 +13,4 @@ All detailed coding guidelines are in the skills:
 - Use `planning` skill for architecture decisions
 - Use `review-changes` skill for code reviews
 - Use `writing` skill for documentation and commit messages
+- Use `tomato-architecture` skill for system design

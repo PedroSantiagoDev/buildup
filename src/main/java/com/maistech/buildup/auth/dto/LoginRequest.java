@@ -1,4 +1,4 @@
-package com.maistech.buildup.dto.request;
+package com.maistech.buildup.auth.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 

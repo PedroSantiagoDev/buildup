@@ -1,4 +1,4 @@
-package com.maistech.buildup.dto.response;
+package com.maistech.buildup.auth.dto;
 
 public record RegisterUserResponse(
         String name,
