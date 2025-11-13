@@ -19,7 +19,7 @@ public class AuthConfig implements UserDetailsService {
     public UserDetails loadUserByUsername(String username)
         throws UsernameNotFoundException {
         return userRepository
-            .findByEmail(username)
+            .findByEmailWithCompanyAndRoles(username)
             .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 }

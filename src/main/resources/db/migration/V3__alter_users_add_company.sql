@@ -1,0 +1,7 @@
+ALTER TABLE users ADD COLUMN company_id UUID;
+ALTER TABLE users ADD COLUMN phone VARCHAR(20);
+ALTER TABLE users ADD COLUMN profile_photo VARCHAR(500);
+ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+
+ALTER TABLE users ADD CONSTRAINT fk_users_company
+    FOREIGN KEY (company_id) REFERENCES companies(id);

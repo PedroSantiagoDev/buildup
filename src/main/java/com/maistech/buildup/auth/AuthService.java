@@ -42,6 +42,11 @@ public class AuthService {
 
         var authentication = authenticationManager.authenticate(credentials);
         var user = (UserEntity) authentication.getPrincipal();
+        
+        // Reload user with company and roles to avoid LazyInitializationException
+        user = userRepository.findByIdWithCompanyAndRoles(user.getId())
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
         var token = tokenConfig.generateToken(user);
 
         return new LoginResponse(token, user.getName(), user.getEmail());

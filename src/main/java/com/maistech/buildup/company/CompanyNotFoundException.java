@@ -1,0 +1,8 @@
+package com.maistech.buildup.company;
+
+public class CompanyNotFoundException extends RuntimeException {
+
+    public CompanyNotFoundException(String message) {
+        super(message);
+    }
+}

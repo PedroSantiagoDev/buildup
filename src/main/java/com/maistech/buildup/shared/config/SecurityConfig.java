@@ -14,15 +14,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final SecurityFilter securityFilter;
+    private final CorsConfigurationSource corsConfigurationSource;
 
-    public SecurityConfig(SecurityFilter securityFilter) {
+    public SecurityConfig(SecurityFilter securityFilter, CorsConfigurationSource corsConfigurationSource) {
         this.securityFilter = securityFilter;
+        this.corsConfigurationSource = corsConfigurationSource;
     }
 
     @Bean
@@ -30,7 +33,7 @@ public class SecurityConfig {
         throws Exception {
         return http
             .csrf(AbstractHttpConfigurer::disable)
-            .cors(cors -> cors.configure(http))
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
@@ -38,11 +41,29 @@ public class SecurityConfig {
                 authorize
                     .dispatcherTypeMatchers(DispatcherType.ERROR)
                     .permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/login")
+                    .requestMatchers(HttpMethod.POST, "/api/auth/login")
                     .permitAll()
-                    .requestMatchers(HttpMethod.POST, "/auth/register")
+                    .requestMatchers(HttpMethod.POST, "/api/auth/register")
                     .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/dev/**")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/companies/**")
+                    .hasAnyRole("SUPER_ADMIN", "ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/api/companies")
+                    .hasRole("SUPER_ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/companies/**")
+                    .hasAnyRole("SUPER_ADMIN", "ADMIN")
+                    .requestMatchers(HttpMethod.PATCH, "/api/companies/**")
+                    .hasRole("SUPER_ADMIN")
                     .requestMatchers("/actuator/**")
+                    .permitAll()
+                    .requestMatchers("/docs/**")
+                    .permitAll()
+                    .requestMatchers("/v3/api-docs/**")
+                    .permitAll()
+                    .requestMatchers("/swagger-ui/**")
+                    .permitAll()
+                    .requestMatchers("/swagger-ui.html")
                     .permitAll()
                     .anyRequest()
                     .authenticated()
