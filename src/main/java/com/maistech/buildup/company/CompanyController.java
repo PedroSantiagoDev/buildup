@@ -5,7 +5,6 @@ import com.maistech.buildup.company.dto.CreateCompanyRequest;
 import com.maistech.buildup.company.dto.UpdateCompanyRequest;
 import com.maistech.buildup.shared.config.JTWUserData;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
