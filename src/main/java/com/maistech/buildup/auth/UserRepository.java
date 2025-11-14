@@ -1,5 +1,6 @@
 package com.maistech.buildup.auth;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +19,10 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID> {
     
     @Query("SELECT u FROM UserEntity u LEFT JOIN FETCH u.company LEFT JOIN FETCH u.roles WHERE u.id = :id")
     Optional<UserEntity> findByIdWithCompanyAndRoles(@Param("id") UUID id);
+    
+    @Query("SELECT u FROM UserEntity u WHERE u.company.id = :companyId")
+    List<UserEntity> findAllByCompanyId(@Param("companyId") UUID companyId);
+    
+    @Query("SELECT u FROM UserEntity u LEFT JOIN FETCH u.roles WHERE u.company.id = :companyId AND u.id = :userId")
+    Optional<UserEntity> findByIdAndCompanyId(@Param("userId") UUID userId, @Param("companyId") UUID companyId);
 }
