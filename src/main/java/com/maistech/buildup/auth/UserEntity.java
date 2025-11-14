@@ -3,6 +3,8 @@ package com.maistech.buildup.auth;
 import com.maistech.buildup.company.CompanyEntity;
 import com.maistech.buildup.role.RoleEntity;
 import com.maistech.buildup.role.RoleEnum;
+import com.maistech.buildup.shared.tenant.TenantAware;
+import com.maistech.buildup.shared.tenant.TenantListener;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -23,8 +25,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "users")
+@EntityListeners(TenantListener.class)
 @Getter
-public class UserEntity implements UserDetails {
+public class UserEntity implements UserDetails, TenantAware {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -79,6 +82,20 @@ public class UserEntity implements UserDetails {
 
     public void setCompany(CompanyEntity company) {
         this.company = company;
+    }
+
+    @Override
+    public UUID getCompanyId() {
+        return company != null ? company.getId() : null;
+    }
+
+    @Override
+    public void setCompanyId(UUID companyId) {
+        if (companyId != null && (company == null || !companyId.equals(company.getId()))) {
+            CompanyEntity newCompany = new CompanyEntity();
+            newCompany.setId(companyId);
+            this.company = newCompany;
+        }
     }
 
     @CreationTimestamp

@@ -20,6 +20,7 @@ public class CompanyEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Setter
     private UUID id;
 
     @NotBlank(message = "Company name is required")

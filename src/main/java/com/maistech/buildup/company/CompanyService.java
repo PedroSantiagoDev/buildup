@@ -9,6 +9,7 @@ import com.maistech.buildup.company.dto.UpdateCompanyRequest;
 import com.maistech.buildup.role.RoleEntity;
 import com.maistech.buildup.role.RoleEnum;
 import com.maistech.buildup.role.RoleRepository;
+import com.maistech.buildup.shared.tenant.TenantHelper;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -26,116 +27,135 @@ public class CompanyService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TenantHelper tenantHelper;
 
     public CompanyService(
         CompanyRepository companyRepository,
         UserRepository userRepository,
         RoleRepository roleRepository,
-        PasswordEncoder passwordEncoder
+        PasswordEncoder passwordEncoder,
+        TenantHelper tenantHelper
     ) {
         this.companyRepository = companyRepository;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.tenantHelper = tenantHelper;
     }
 
     public CompanyResponse createCompany(
         CreateCompanyRequest request,
         UUID masterCompanyId
     ) {
-        validateDocumentDoesNotExist(request.document());
+        return tenantHelper.withoutTenantFilter(() -> {
+            validateDocumentDoesNotExist(request.document());
 
-        CompanyEntity masterCompany = companyRepository
-            .findById(masterCompanyId)
-            .orElseThrow(() ->
-                new CompanyNotFoundException("Master company not found")
-            );
+            CompanyEntity masterCompany = companyRepository
+                .findById(masterCompanyId)
+                .orElseThrow(() ->
+                    new CompanyNotFoundException("Master company not found")
+                );
 
-        CompanyEntity company = new CompanyEntity();
-        company.setName(request.name());
-        company.setDocument(request.document());
-        company.setEmail(request.email());
-        company.setPhone(request.phone());
-        company.setAddress(request.address());
-        company.setLogoUrl(request.logoUrl());
-        company.setIsMaster(false);
-        company.setIsActive(true);
-        company.setMasterCompany(masterCompany);
+            CompanyEntity company = new CompanyEntity();
+            company.setName(request.name());
+            company.setDocument(request.document());
+            company.setEmail(request.email());
+            company.setPhone(request.phone());
+            company.setAddress(request.address());
+            company.setLogoUrl(request.logoUrl());
+            company.setIsMaster(false);
+            company.setIsActive(true);
+            company.setMasterCompany(masterCompany);
 
-        company = companyRepository.save(company);
+            company = companyRepository.save(company);
 
-        if (request.adminUser() != null) {
-            createAdminUser(company, request.adminUser());
-        }
+            if (request.adminUser() != null) {
+                createAdminUser(company, request.adminUser());
+            }
 
-        return mapToResponse(company);
+            return mapToResponse(company);
+        });
     }
 
     public CompanyResponse updateCompany(
         UUID companyId,
         UpdateCompanyRequest request
     ) {
-        CompanyEntity company = findCompanyOrThrow(companyId);
+        return tenantHelper.withoutTenantFilter(() -> {
+            CompanyEntity company = findCompanyOrThrow(companyId);
 
-        if (request.name() != null) {
-            company.setName(request.name());
-        }
-        if (request.email() != null) {
-            company.setEmail(request.email());
-        }
-        if (request.phone() != null) {
-            company.setPhone(request.phone());
-        }
-        if (request.address() != null) {
-            company.setAddress(request.address());
-        }
-        if (request.logoUrl() != null) {
-            company.setLogoUrl(request.logoUrl());
-        }
+            if (request.name() != null) {
+                company.setName(request.name());
+            }
+            if (request.email() != null) {
+                company.setEmail(request.email());
+            }
+            if (request.phone() != null) {
+                company.setPhone(request.phone());
+            }
+            if (request.address() != null) {
+                company.setAddress(request.address());
+            }
+            if (request.logoUrl() != null) {
+                company.setLogoUrl(request.logoUrl());
+            }
 
-        company = companyRepository.save(company);
-        return mapToResponse(company);
+            company = companyRepository.save(company);
+            return mapToResponse(company);
+        });
     }
 
     public void deactivateCompany(UUID companyId) {
-        CompanyEntity company = findCompanyOrThrow(companyId);
-        company.setIsActive(false);
-        companyRepository.save(company);
+        tenantHelper.withoutTenantFilter(() -> {
+            CompanyEntity company = findCompanyOrThrow(companyId);
+            company.setIsActive(false);
+            companyRepository.save(company);
+        });
     }
 
     public void activateCompany(UUID companyId) {
-        CompanyEntity company = findCompanyOrThrow(companyId);
-        company.setIsActive(true);
-        companyRepository.save(company);
+        tenantHelper.withoutTenantFilter(() -> {
+            CompanyEntity company = findCompanyOrThrow(companyId);
+            company.setIsActive(true);
+            companyRepository.save(company);
+        });
     }
 
     @Transactional(readOnly = true)
     public CompanyResponse getCompanyById(UUID companyId) {
-        CompanyEntity company = findCompanyOrThrow(companyId);
-        return mapToResponse(company);
+        return tenantHelper.withoutTenantFilter(() -> {
+            CompanyEntity company = findCompanyOrThrow(companyId);
+            return mapToResponse(company);
+        });
     }
 
     @Transactional(readOnly = true)
     public List<CompanyResponse> listAllCompanies() {
-        return companyRepository
-            .findAll()
-            .stream()
-            .map(this::mapToResponse)
-            .collect(Collectors.toList());
+        return tenantHelper.withoutTenantFilter(() ->
+            companyRepository
+                .findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList())
+        );
     }
 
     @Transactional(readOnly = true)
     public Page<CompanyResponse> listAllCompanies(Pageable pageable) {
-        return companyRepository.findAll(pageable).map(this::mapToResponse);
+        return tenantHelper.withoutTenantFilter(() ->
+            companyRepository.findAll(pageable).map(this::mapToResponse)
+        );
     }
 
     @Transactional(readOnly = true)
     public List<CompanyResponse> listClientCompanies(UUID masterCompanyId) {
-        return companyRepository
-            .findAllClientCompanies(masterCompanyId)
-            .stream()
-            .map(this::mapToResponse)
-            .collect(Collectors.toList());
+        return tenantHelper.withoutTenantFilter(() ->
+            companyRepository
+                .findAllClientCompanies(masterCompanyId)
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList())
+        );
     }
 
     private UserEntity createAdminUser(
