@@ -6,7 +6,7 @@ import com.maistech.buildup.auth.dto.LoginResponse;
 import com.maistech.buildup.auth.dto.RegisterUserRequest;
 import com.maistech.buildup.auth.dto.RegisterUserResponse;
 import com.maistech.buildup.auth.dto.UserResponse;
-import com.maistech.buildup.shared.config.JTWUserData;
+import com.maistech.buildup.shared.config.JWTUserData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,8 +25,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth")
-@Tag(name = "Authentication", description = "User authentication and registration endpoints")
+@RequestMapping("/auth")
+@Tag(
+    name = "Authentication",
+    description = "User authentication and registration endpoints"
+)
 public class AuthController {
 
     private final AuthService authService;
@@ -133,7 +136,7 @@ public class AuthController {
         @Valid @RequestBody CreateUserRequest request,
         Authentication authentication
     ) {
-        JTWUserData userData = (JTWUserData) authentication.getPrincipal();
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
         UserResponse response = authService.createUser(
             request,
             userData.companyId()

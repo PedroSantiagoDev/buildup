@@ -3,7 +3,7 @@ package com.maistech.buildup.company;
 import com.maistech.buildup.company.dto.CompanyResponse;
 import com.maistech.buildup.company.dto.CreateCompanyRequest;
 import com.maistech.buildup.company.dto.UpdateCompanyRequest;
-import com.maistech.buildup.shared.config.JTWUserData;
+import com.maistech.buildup.shared.config.JWTUserData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/companies")
+@RequestMapping("/companies")
 @SecurityRequirement(name = "bearer-jwt")
 @Tag(
     name = "Companies",
@@ -60,14 +60,17 @@ public class CompanyController {
                 description = "Validation error or company already exists",
                 content = @Content
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - requires SUPER_ADMIN role"),
+            @ApiResponse(
+                responseCode = "403",
+                description = "Forbidden - requires SUPER_ADMIN role"
+            ),
         }
     )
     public ResponseEntity<CompanyResponse> createCompany(
         @Valid @RequestBody CreateCompanyRequest request,
         Authentication authentication
     ) {
-        JTWUserData userData = (JTWUserData) authentication.getPrincipal();
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
         CompanyResponse response = companyService.createCompany(
             request,
             userData.companyId()
@@ -87,7 +90,10 @@ public class CompanyController {
                 responseCode = "200",
                 description = "Companies retrieved successfully"
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - requires SUPER_ADMIN from master company"),
+            @ApiResponse(
+                responseCode = "403",
+                description = "Forbidden - requires SUPER_ADMIN from master company"
+            ),
         }
     )
     public ResponseEntity<Page<CompanyResponse>> listCompanies(
@@ -98,7 +104,7 @@ public class CompanyController {
         ) @Parameter(description = "Pagination parameters") Pageable pageable,
         Authentication authentication
     ) {
-        JTWUserData userData = (JTWUserData) authentication.getPrincipal();
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
 
         Page<CompanyResponse> companies;
         if (userData.isMasterCompany()) {
@@ -128,15 +134,21 @@ public class CompanyController {
                     schema = @Schema(implementation = CompanyResponse.class)
                 )
             ),
-            @ApiResponse(responseCode = "403", description = "Forbidden - cannot access other company"),
-            @ApiResponse(responseCode = "404", description = "Company not found"),
+            @ApiResponse(
+                responseCode = "403",
+                description = "Forbidden - cannot access other company"
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Company not found"
+            ),
         }
     )
     public ResponseEntity<CompanyResponse> getCompany(
         @PathVariable @Parameter(description = "Company UUID") UUID companyId,
         Authentication authentication
     ) {
-        JTWUserData userData = (JTWUserData) authentication.getPrincipal();
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
         validateCompanyAccess(userData, companyId);
 
         CompanyResponse company = companyService.getCompanyById(companyId);
@@ -155,9 +167,18 @@ public class CompanyController {
                 responseCode = "200",
                 description = "Company updated successfully"
             ),
-            @ApiResponse(responseCode = "400", description = "Validation error"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - cannot update other company"),
-            @ApiResponse(responseCode = "404", description = "Company not found"),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Validation error"
+            ),
+            @ApiResponse(
+                responseCode = "403",
+                description = "Forbidden - cannot update other company"
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Company not found"
+            ),
         }
     )
     public ResponseEntity<CompanyResponse> updateCompany(
@@ -165,7 +186,7 @@ public class CompanyController {
         @Valid @RequestBody UpdateCompanyRequest request,
         Authentication authentication
     ) {
-        JTWUserData userData = (JTWUserData) authentication.getPrincipal();
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
         validateCompanyAccess(userData, companyId);
 
         CompanyResponse company = companyService.updateCompany(
@@ -183,9 +204,18 @@ public class CompanyController {
     )
     @ApiResponses(
         value = {
-            @ApiResponse(responseCode = "204", description = "Company deactivated"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - requires SUPER_ADMIN"),
-            @ApiResponse(responseCode = "404", description = "Company not found"),
+            @ApiResponse(
+                responseCode = "204",
+                description = "Company deactivated"
+            ),
+            @ApiResponse(
+                responseCode = "403",
+                description = "Forbidden - requires SUPER_ADMIN"
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Company not found"
+            ),
         }
     )
     public ResponseEntity<Void> deactivateCompany(
@@ -203,9 +233,18 @@ public class CompanyController {
     )
     @ApiResponses(
         value = {
-            @ApiResponse(responseCode = "204", description = "Company activated"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - requires SUPER_ADMIN"),
-            @ApiResponse(responseCode = "404", description = "Company not found"),
+            @ApiResponse(
+                responseCode = "204",
+                description = "Company activated"
+            ),
+            @ApiResponse(
+                responseCode = "403",
+                description = "Forbidden - requires SUPER_ADMIN"
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Company not found"
+            ),
         }
     )
     public ResponseEntity<Void> activateCompany(
@@ -215,7 +254,7 @@ public class CompanyController {
         return ResponseEntity.noContent().build();
     }
 
-    private void validateCompanyAccess(JTWUserData userData, UUID companyId) {
+    private void validateCompanyAccess(JWTUserData userData, UUID companyId) {
         if (userData.isMasterCompany()) {
             return;
         }

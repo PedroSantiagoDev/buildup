@@ -35,7 +35,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             return;
         }
 
-        Optional<JTWUserData> optUser = tokenConfig.validateToken(token);
+        Optional<JWTUserData> optUser = tokenConfig.validateToken(token);
 
         if (optUser.isEmpty()) {
             filterChain.doFilter(request, response);

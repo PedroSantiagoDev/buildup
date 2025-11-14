@@ -1,6 +1,6 @@
 package com.maistech.buildup.shared.tenant;
 
-import com.maistech.buildup.shared.config.JTWUserData;
+import com.maistech.buildup.shared.config.JWTUserData;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +28,7 @@ public class TenantFilter extends OncePerRequestFilter {
 
             if (
                 authentication != null &&
-                authentication.getPrincipal() instanceof JTWUserData userData
+                authentication.getPrincipal() instanceof JWTUserData userData
             ) {
                 TenantContext.setTenantId(userData.companyId());
             }

@@ -51,14 +51,14 @@ public class TokenConfig {
             .sign(Algorithm.HMAC256(secret));
     }
 
-    public Optional<JTWUserData> validateToken(String token) {
+    public Optional<JWTUserData> validateToken(String token) {
         try {
             DecodedJWT decoded = JWT.require(Algorithm.HMAC256(secret))
                 .build()
                 .verify(token);
 
             return Optional.of(
-                JTWUserData.builder()
+                JWTUserData.builder()
                     .userId(
                         UUID.fromString(decoded.getClaim("userId").asString())
                     )

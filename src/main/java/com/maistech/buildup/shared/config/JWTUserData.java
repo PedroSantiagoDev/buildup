@@ -5,7 +5,7 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record JTWUserData(
+public record JWTUserData(
     UUID userId,
     String email,
     UUID companyId,
