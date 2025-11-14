@@ -18,27 +18,43 @@ public class OpenApiConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
-        final String securitySchemeName = "bearerAuth";
+        final String securitySchemeName = "bearer-jwt";
 
         return new OpenAPI()
             .info(new Info()
                 .title("BuildUp API")
-                .description("API para gerenciamento de obras e construção civil")
+                .description("""
+                    Multi-tenant B2B application with role-based access control.
+                    
+                    ## Features
+                    - JWT Authentication
+                    - Multi-tenant row-level isolation
+                    - Role-based permissions (USER, ADMIN, SUPER_ADMIN)
+                    - Automatic tenant filtering
+                    
+                    ## Authentication
+                    1. Login with POST /api/auth/login to get JWT token
+                    2. Click 'Authorize' button and paste token
+                    3. Token contains user info and company (tenant) context
+                    
+                    ## Multi-Tenancy
+                    All data is automatically filtered by company. Users only see their company's data.
+                    """)
                 .version("1.0.0")
                 .contact(new Contact()
-                    .name("MaisTech")
-                    .email("contato@maistech.com.br")
-                    .url("https://maistech.com.br"))
+                    .name("MaisTech Support")
+                    .email("support@maistech.com")
+                    .url("https://maistech.com"))
                 .license(new License()
-                    .name("Apache 2.0")
-                    .url("https://www.apache.org/licenses/LICENSE-2.0.html")))
+                    .name("MIT License")
+                    .url("https://opensource.org/licenses/MIT")))
             .servers(List.of(
                 new Server()
                     .url("http://localhost:8080")
-                    .description("Servidor de Desenvolvimento"),
+                    .description("Development Server"),
                 new Server()
-                    .url("https://api.buildup.com.br")
-                    .description("Servidor de Produção")))
+                    .url("https://api.buildup.com")
+                    .description("Production Server")))
             .addSecurityItem(new SecurityRequirement()
                 .addList(securitySchemeName))
             .components(new Components()
@@ -47,6 +63,6 @@ public class OpenApiConfig {
                     .type(SecurityScheme.Type.HTTP)
                     .scheme("bearer")
                     .bearerFormat("JWT")
-                    .description("Insira o token JWT obtido no endpoint /api/auth/login")));
+                    .description("Enter JWT token obtained from /api/auth/login endpoint")));
     }
 }
