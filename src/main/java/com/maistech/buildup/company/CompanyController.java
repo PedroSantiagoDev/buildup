@@ -149,9 +149,11 @@ public class CompanyController {
         Authentication authentication
     ) {
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
-        validateCompanyAccess(userData, companyId);
-
-        CompanyResponse company = companyService.getCompanyById(companyId);
+        CompanyResponse company = companyService.getCompanyById(
+            companyId,
+            userData.companyId(),
+            userData.isMasterCompany()
+        );
         return ResponseEntity.ok(company);
     }
 
@@ -187,11 +189,11 @@ public class CompanyController {
         Authentication authentication
     ) {
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
-        validateCompanyAccess(userData, companyId);
-
         CompanyResponse company = companyService.updateCompany(
             companyId,
-            request
+            request,
+            userData.companyId(),
+            userData.isMasterCompany()
         );
         return ResponseEntity.ok(company);
     }
@@ -252,17 +254,5 @@ public class CompanyController {
     ) {
         companyService.activateCompany(companyId);
         return ResponseEntity.noContent().build();
-    }
-
-    private void validateCompanyAccess(JWTUserData userData, UUID companyId) {
-        if (userData.isMasterCompany()) {
-            return;
-        }
-
-        if (!userData.companyId().equals(companyId)) {
-            throw new IllegalStateException(
-                "You can only access your own company"
-            );
-        }
     }
 }

@@ -79,9 +79,12 @@ public class CompanyService {
 
     public CompanyResponse updateCompany(
         UUID companyId,
-        UpdateCompanyRequest request
+        UpdateCompanyRequest request,
+        UUID requestingCompanyId,
+        boolean isMaster
     ) {
         return tenantHelper.withoutTenantFilter(() -> {
+            validateCompanyAccess(requestingCompanyId, companyId, isMaster);
             CompanyEntity company = findCompanyOrThrow(companyId);
 
             if (request.name() != null) {
@@ -122,8 +125,9 @@ public class CompanyService {
     }
 
     @Transactional(readOnly = true)
-    public CompanyResponse getCompanyById(UUID companyId) {
+    public CompanyResponse getCompanyById(UUID companyId, UUID requestingCompanyId, boolean isMaster) {
         return tenantHelper.withoutTenantFilter(() -> {
+            validateCompanyAccess(requestingCompanyId, companyId, isMaster);
             CompanyEntity company = findCompanyOrThrow(companyId);
             return mapToResponse(company);
         });
@@ -176,7 +180,7 @@ public class CompanyService {
             .orElseThrow(() ->
                 new IllegalStateException("ADMIN role not found")
             );
-        admin.getRoles().add(adminRole);
+        admin.assignRole(adminRole);
 
         return userRepository.save(admin);
     }
@@ -217,5 +221,15 @@ public class CompanyService {
             company.getIsActive(),
             company.getCreatedAt()
         );
+    }
+
+    private void validateCompanyAccess(UUID requestingCompanyId, UUID targetCompanyId, boolean isMaster) {
+        if (isMaster) {
+            return;
+        }
+        
+        if (!requestingCompanyId.equals(targetCompanyId)) {
+            throw new IllegalStateException("You can only access your own company");
+        }
     }
 }

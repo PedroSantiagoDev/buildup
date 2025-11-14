@@ -14,6 +14,7 @@ import com.maistech.buildup.role.RoleEntity;
 import com.maistech.buildup.role.RoleEnum;
 import com.maistech.buildup.role.RoleRepository;
 import com.maistech.buildup.shared.config.TokenConfig;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -57,11 +58,11 @@ public class AuthService {
 
         var authentication = authenticationManager.authenticate(credentials);
         var user = (UserEntity) authentication.getPrincipal();
-        
-        // Reload user with company and roles to avoid LazyInitializationException
-        user = userRepository.findByIdWithCompanyAndRoles(user.getId())
+
+        user = userRepository
+            .findByIdWithCompanyAndRoles(user.getId())
             .orElseThrow(() -> new RuntimeException("User not found"));
-        
+
         var token = tokenConfig.generateToken(user);
 
         return new LoginResponse(token, user.getName(), user.getEmail());
@@ -101,16 +102,17 @@ public class AuthService {
         user.setName(request.name());
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
-        
-        // Valida e vincula à empresa
+
         CompanyEntity company = companyRepository
             .findById(request.companyId())
             .orElseThrow(() ->
-                new IllegalArgumentException("Company not found: " + request.companyId())
+                new IllegalArgumentException(
+                    "Company not found: " + request.companyId()
+                )
             );
-        
+
         user.setCompany(company);
-        
+
         return user;
     }
 
@@ -132,21 +134,28 @@ public class AuthService {
         user.setIsActive(true);
 
         if (request.roles() != null && !request.roles().isEmpty()) {
-            for (String roleName : request.roles()) {
-                RoleEntity role = roleRepository
-                    .findByName(roleName)
-                    .orElseThrow(() ->
-                        new IllegalArgumentException("Role not found: " + roleName)
-                    );
-                user.getRoles().add(role);
-            }
+            Set<RoleEntity> rolesToAssign = request
+                .roles()
+                .stream()
+                .map(roleName ->
+                    roleRepository
+                        .findByName(roleName)
+                        .orElseThrow(() ->
+                            new IllegalArgumentException(
+                                "Role not found: " + roleName
+                            )
+                        )
+                )
+                .collect(Collectors.toSet());
+
+            user.assignRoles(rolesToAssign);
         } else {
             RoleEntity userRole = roleRepository
                 .findByName(RoleEnum.USER.name())
                 .orElseThrow(() ->
                     new IllegalStateException("USER role not found")
                 );
-            user.getRoles().add(userRole);
+            user.assignRole(userRole);
         }
 
         UserEntity saved = userRepository.save(user);
@@ -160,7 +169,11 @@ public class AuthService {
             user.getEmail(),
             user.getCompany() != null ? user.getCompany().getId() : null,
             user.getCompany() != null ? user.getCompany().getName() : null,
-            user.getRoles().stream().map(r -> r.getName()).collect(Collectors.toList()),
+            user
+                .getRoles()
+                .stream()
+                .map(r -> r.getName())
+                .collect(Collectors.toList()),
             user.getIsActive(),
             user.getCreatedAt()
         );

@@ -11,12 +11,10 @@ import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.Getter;
-import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -34,14 +32,11 @@ public class UserEntity implements UserDetails, TenantAware {
     private UUID id;
 
     @NotBlank
-    @Setter
     private String name;
 
     @Email
-    @Setter
     private String email;
 
-    @Setter
     private String password;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -56,6 +51,24 @@ public class UserEntity implements UserDetails, TenantAware {
     )
     private Set<RoleEntity> roles = new HashSet<>();
 
+    public void assignRole(RoleEntity role) {
+        if (role == null) {
+            throw new IllegalArgumentException("Role cannot be null");
+        }
+        this.roles.add(role);
+    }
+
+    public void assignRoles(Set<RoleEntity> rolesToAssign) {
+        if (rolesToAssign == null || rolesToAssign.isEmpty()) {
+            return;
+        }
+        rolesToAssign.forEach(this::assignRole);
+    }
+
+    public void clearRoles() {
+        this.roles.clear();
+    }
+
     public boolean hasRole(RoleEnum role) {
         return roles.stream().anyMatch(r -> r.getName().equals(role.name()));
     }
@@ -69,12 +82,30 @@ public class UserEntity implements UserDetails, TenantAware {
     }
 
     @Column(name = "profile_photo")
-    @Setter
     private String profilePhoto;
 
     @Column(name = "is_active")
-    @Setter
     private Boolean isActive = true;
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setProfilePhoto(String profilePhoto) {
+        this.profilePhoto = profilePhoto;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
 
     public CompanyEntity getCompany() {
         return company;
@@ -91,7 +122,10 @@ public class UserEntity implements UserDetails, TenantAware {
 
     @Override
     public void setCompanyId(UUID companyId) {
-        if (companyId != null && (company == null || !companyId.equals(company.getId()))) {
+        if (
+            companyId != null &&
+            (company == null || !companyId.equals(company.getId()))
+        ) {
             CompanyEntity newCompany = new CompanyEntity();
             newCompany.setId(companyId);
             this.company = newCompany;

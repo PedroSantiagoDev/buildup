@@ -15,7 +15,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 @MappedSuperclass
 @EntityListeners(TenantListener.class)
-@FilterDef(name = "tenantFilter", parameters = @ParamDef(name = "tenantId", type = UUID.class))
+@FilterDef(
+    name = "tenantFilter",
+    parameters = @ParamDef(name = "tenantId", type = UUID.class)
+)
 @Filter(name = "tenantFilter", condition = "company_id = :tenantId")
 @Getter
 public abstract class BaseEntity implements TenantAware {

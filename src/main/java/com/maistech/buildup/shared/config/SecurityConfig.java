@@ -23,7 +23,10 @@ public class SecurityConfig {
     private final SecurityFilter securityFilter;
     private final CorsConfigurationSource corsConfigurationSource;
 
-    public SecurityConfig(SecurityFilter securityFilter, CorsConfigurationSource corsConfigurationSource) {
+    public SecurityConfig(
+        SecurityFilter securityFilter,
+        CorsConfigurationSource corsConfigurationSource
+    ) {
         this.securityFilter = securityFilter;
         this.corsConfigurationSource = corsConfigurationSource;
     }
