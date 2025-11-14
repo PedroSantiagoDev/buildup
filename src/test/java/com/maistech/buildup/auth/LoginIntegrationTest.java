@@ -50,7 +50,8 @@ class LoginIntegrationTest {
         RegisterUserRequest registerRequest = new RegisterUserRequest(
             "John Doe",
             "john@example.com",
-            "password123"
+            "password123",
+            null
         );
         restTemplate.postForEntity(
             "/auth/register",

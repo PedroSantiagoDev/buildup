@@ -92,7 +92,8 @@ class AuthServiceTest {
         RegisterUserRequest request = new RegisterUserRequest(
             "John Doe",
             "john@example.com",
-            "password123"
+            "password123",
+            null
         );
 
         when(userRepository.existsByEmail("john@example.com")).thenReturn(true);
@@ -110,7 +111,8 @@ class AuthServiceTest {
         RegisterUserRequest request = new RegisterUserRequest(
             "John Doe",
             "john@example.com",
-            "password123"
+            "password123",
+            null
         );
 
         when(userRepository.existsByEmail("john@example.com")).thenReturn(
@@ -142,7 +144,8 @@ class AuthServiceTest {
         RegisterUserRequest request = new RegisterUserRequest(
             "John Doe",
             "john@example.com",
-            "short"
+            "short",
+            null
         );
 
         when(userRepository.existsByEmail("john@example.com")).thenReturn(
