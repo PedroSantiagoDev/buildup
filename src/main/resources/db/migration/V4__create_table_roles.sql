@@ -5,8 +5,8 @@ CREATE TABLE roles (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-INSERT INTO roles (name, description) VALUES
-    ('SUPER_ADMIN', 'Administrador Master do SaaS'),
-    ('ADMIN', 'Administrador da Empresa'),
-    ('MANAGER', 'Gerente de Obras'),
-    ('USER', 'Usuário Básico');
+INSERT INTO roles (id, name, description) VALUES
+    ('00000000-0000-0000-0000-000000000001', 'SUPER_ADMIN', 'Administrador Master do SaaS'),
+    ('00000000-0000-0000-0000-000000000002', 'ADMIN', 'Administrador da Empresa'),
+    ('00000000-0000-0000-0000-000000000003', 'MANAGER', 'Gerente de Obras'),
+    ('00000000-0000-0000-0000-000000000004', 'USER', 'Usuário Básico');
