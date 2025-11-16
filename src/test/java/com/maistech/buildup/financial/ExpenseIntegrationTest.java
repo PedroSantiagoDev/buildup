@@ -520,9 +520,6 @@ class ExpenseIntegrationTest {
     @Test
     @DisplayName("should list expenses by category")
     void shouldListExpensesByCategory() {
-        UUID expense1Id = createTestExpense("Material 1", new BigDecimal("500.00"));
-        UUID expense2Id = createTestExpense("Material 2", new BigDecimal("750.00"));
-
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(authToken);
         HttpEntity<Void> entity = new HttpEntity<>(headers);

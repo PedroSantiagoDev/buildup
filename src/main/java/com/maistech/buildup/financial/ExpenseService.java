@@ -324,9 +324,11 @@ public class ExpenseService {
     }
 
     private ExpenseResponse mapToResponse(ExpenseEntity expense) {
-        List<ExpenseInstallmentEntity> installmentEntities = 
-            installmentRepository.findByExpenseIdOrderByInstallmentNumberAsc(expense.getId());
-        
+        List<ExpenseInstallmentEntity> installmentEntities =
+            installmentRepository.findByExpenseIdOrderByInstallmentNumberAsc(
+                expense.getId()
+            );
+
         List<InstallmentResponse> installments = installmentEntities
             .stream()
             .map(i ->
