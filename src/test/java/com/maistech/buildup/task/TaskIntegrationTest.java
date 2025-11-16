@@ -244,8 +244,8 @@ class TaskIntegrationTest {
             9,
             TaskStatus.IN_PROGRESS,
             TaskPriority.LOW,
-            50,
-            userId
+            userId,
+            50
         );
 
         HttpHeaders headers = new HttpHeaders();
