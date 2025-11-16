@@ -9,17 +9,17 @@ CREATE TABLE expense_categories
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-INSERT INTO expense_categories (name, description, icon, color) VALUES
-    ('MAO_DE_OBRA', 'Mão de Obra', 'users', '#3B82F6'),
-    ('MATERIAIS', 'Materiais de Construção', 'package', '#10B981'),
-    ('EQUIPAMENTOS', 'Equipamentos e Ferramentas', 'tool', '#F59E0B'),
-    ('TRANSPORTE', 'Transporte e Frete', 'truck', '#6366F1'),
-    ('ALIMENTACAO', 'Alimentação', 'coffee', '#EC4899'),
-    ('ADMINISTRATIVO', 'Despesas Administrativas', 'briefcase', '#8B5CF6'),
-    ('IMPOSTOS', 'Impostos e Taxas', 'file-text', '#EF4444'),
-    ('ALUGUEL', 'Aluguel de Equipamentos', 'home', '#14B8A6'),
-    ('SERVICOS', 'Serviços Terceirizados', 'users', '#F97316'),
-    ('OUTROS', 'Outros', 'more-horizontal', '#6B7280');
+INSERT INTO expense_categories (id, name, description, icon, color) VALUES
+    (gen_random_uuid(), 'MAO_DE_OBRA', 'Mão de Obra', 'users', '#3B82F6'),
+    (gen_random_uuid(), 'MATERIAIS', 'Materiais de Construção', 'package', '#10B981'),
+    (gen_random_uuid(), 'EQUIPAMENTOS', 'Equipamentos e Ferramentas', 'tool', '#F59E0B'),
+    (gen_random_uuid(), 'TRANSPORTE', 'Transporte e Frete', 'truck', '#6366F1'),
+    (gen_random_uuid(), 'ALIMENTACAO', 'Alimentação', 'coffee', '#EC4899'),
+    (gen_random_uuid(), 'ADMINISTRATIVO', 'Despesas Administrativas', 'briefcase', '#8B5CF6'),
+    (gen_random_uuid(), 'IMPOSTOS', 'Impostos e Taxas', 'file-text', '#EF4444'),
+    (gen_random_uuid(), 'ALUGUEL', 'Aluguel de Equipamentos', 'home', '#14B8A6'),
+    (gen_random_uuid(), 'SERVICOS', 'Serviços Terceirizados', 'users', '#F97316'),
+    (gen_random_uuid(), 'OUTROS', 'Outros', 'more-horizontal', '#6B7280');
 
 CREATE TABLE expenses (
     id UUID PRIMARY KEY,
