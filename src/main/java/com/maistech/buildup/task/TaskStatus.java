@@ -1,0 +1,19 @@
+package com.maistech.buildup.task;
+
+public enum TaskStatus {
+    PENDING("Pendente"),
+    IN_PROGRESS("Em Andamento"),
+    COMPLETED("Concluída"),
+    CANCELLED("Cancelada"),
+    BLOCKED("Bloqueada");
+
+    private final String displayName;
+
+    TaskStatus(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+}
