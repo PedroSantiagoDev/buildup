@@ -189,7 +189,9 @@ class CompanyServiceTest {
 
         CompanyResponse response = companyService.updateCompany(
             companyId,
-            updateRequest
+            updateRequest,
+            masterCompanyId,
+            true
         );
 
         assertNotNull(response);
@@ -255,7 +257,11 @@ class CompanyServiceTest {
             Optional.of(company)
         );
 
-        CompanyResponse response = companyService.getCompanyById(companyId);
+        CompanyResponse response = companyService.getCompanyById(
+            companyId,
+            masterCompanyId,
+            true
+        );
 
         assertNotNull(response);
         assertEquals(company.getName(), response.name());
@@ -272,7 +278,7 @@ class CompanyServiceTest {
         );
 
         assertThrows(CompanyNotFoundException.class, () ->
-            companyService.getCompanyById(companyId)
+            companyService.getCompanyById(companyId, masterCompanyId, true)
         );
     }
 
