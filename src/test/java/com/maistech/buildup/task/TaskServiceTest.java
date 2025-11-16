@@ -106,8 +106,9 @@ class TaskServiceTest {
     @Test
     @DisplayName("createTask - should create task successfully")
     void shouldCreateTaskSuccessfully() {
-        when(projectRepository.findByIdAndCompanyId(projectId, companyId))
-            .thenReturn(Optional.of(project));
+        when(
+            projectRepository.findByIdAndCompanyId(projectId, companyId)
+        ).thenReturn(Optional.of(project));
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
 
@@ -134,8 +135,9 @@ class TaskServiceTest {
     @Test
     @DisplayName("createTask - should throw exception when project not found")
     void shouldThrowExceptionWhenProjectNotFound() {
-        when(projectRepository.findByIdAndCompanyId(projectId, companyId))
-            .thenReturn(Optional.empty());
+        when(
+            projectRepository.findByIdAndCompanyId(projectId, companyId)
+        ).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
             taskService.createTask(companyId, projectId, userId, createRequest)
@@ -149,8 +151,9 @@ class TaskServiceTest {
     @Test
     @DisplayName("createTask - should throw exception when creator not found")
     void shouldThrowExceptionWhenCreatorNotFound() {
-        when(projectRepository.findByIdAndCompanyId(projectId, companyId))
-            .thenReturn(Optional.of(project));
+        when(
+            projectRepository.findByIdAndCompanyId(projectId, companyId)
+        ).thenReturn(Optional.of(project));
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
@@ -178,8 +181,9 @@ class TaskServiceTest {
         );
 
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        when(projectRepository.findByIdAndCompanyId(projectId, companyId))
-            .thenReturn(Optional.of(project));
+        when(
+            projectRepository.findByIdAndCompanyId(projectId, companyId)
+        ).thenReturn(Optional.of(project));
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
 
@@ -227,8 +231,9 @@ class TaskServiceTest {
     @DisplayName("deleteTask - should delete task successfully")
     void shouldDeleteTaskSuccessfully() {
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        when(projectRepository.findByIdAndCompanyId(projectId, companyId))
-            .thenReturn(Optional.of(project));
+        when(
+            projectRepository.findByIdAndCompanyId(projectId, companyId)
+        ).thenReturn(Optional.of(project));
 
         taskService.deleteTask(companyId, projectId, taskId);
 
@@ -239,8 +244,9 @@ class TaskServiceTest {
     @DisplayName("getTaskById - should return task successfully")
     void shouldGetTaskByIdSuccessfully() {
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        when(projectRepository.findByIdAndCompanyId(projectId, companyId))
-            .thenReturn(Optional.of(project));
+        when(
+            projectRepository.findByIdAndCompanyId(projectId, companyId)
+        ).thenReturn(Optional.of(project));
 
         TaskResponse response = taskService.getTaskById(
             companyId,
@@ -256,10 +262,12 @@ class TaskServiceTest {
     @Test
     @DisplayName("listProjectTasks - should return all project tasks")
     void shouldListProjectTasksSuccessfully() {
-        when(projectRepository.findByIdAndCompanyId(projectId, companyId))
-            .thenReturn(Optional.of(project));
-        when(taskRepository.findByProjectIdOrderByOrderIndexAsc(projectId))
-            .thenReturn(List.of(task));
+        when(
+            projectRepository.findByIdAndCompanyId(projectId, companyId)
+        ).thenReturn(Optional.of(project));
+        when(
+            taskRepository.findByProjectIdOrderByOrderIndexAsc(projectId)
+        ).thenReturn(List.of(task));
 
         List<TaskResponse> response = taskService.listProjectTasks(
             companyId,
@@ -273,8 +281,9 @@ class TaskServiceTest {
     @Test
     @DisplayName("listUserTasks - should return user's assigned tasks")
     void shouldListUserTasksSuccessfully() {
-        when(taskRepository.findByAssignedToId(userId))
-            .thenReturn(List.of(task));
+        when(taskRepository.findByAssignedToId(userId)).thenReturn(
+            List.of(task)
+        );
 
         List<TaskResponse> response = taskService.listUserTasks(userId);
 
@@ -288,13 +297,11 @@ class TaskServiceTest {
         task.setEndDate(LocalDate.now().minusDays(1));
         task.setStatus(TaskStatus.IN_PROGRESS);
 
-        when(projectRepository.findByIdAndCompanyId(projectId, companyId))
-            .thenReturn(Optional.of(project));
         when(
-            taskRepository.findOverdueTasks(
-                eq(projectId),
-                any(LocalDate.class)
-            )
+            projectRepository.findByIdAndCompanyId(projectId, companyId)
+        ).thenReturn(Optional.of(project));
+        when(
+            taskRepository.findOverdueTasks(eq(projectId), any(LocalDate.class))
         ).thenReturn(List.of(task));
 
         List<TaskResponse> response = taskService.listOverdueTasks(
@@ -310,8 +317,9 @@ class TaskServiceTest {
     @DisplayName("startTask - should update task status to IN_PROGRESS")
     void shouldStartTaskSuccessfully() {
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        when(projectRepository.findByIdAndCompanyId(projectId, companyId))
-            .thenReturn(Optional.of(project));
+        when(
+            projectRepository.findByIdAndCompanyId(projectId, companyId)
+        ).thenReturn(Optional.of(project));
         when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
 
         TaskResponse response = taskService.startTask(
@@ -331,8 +339,9 @@ class TaskServiceTest {
         task.setStatus(TaskStatus.IN_PROGRESS);
 
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        when(projectRepository.findByIdAndCompanyId(projectId, companyId))
-            .thenReturn(Optional.of(project));
+        when(
+            projectRepository.findByIdAndCompanyId(projectId, companyId)
+        ).thenReturn(Optional.of(project));
         when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
 
         TaskResponse response = taskService.completeTask(
@@ -355,8 +364,9 @@ class TaskServiceTest {
         );
 
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        when(projectRepository.findByIdAndCompanyId(projectId, companyId))
-            .thenReturn(Optional.of(project));
+        when(
+            projectRepository.findByIdAndCompanyId(projectId, companyId)
+        ).thenReturn(Optional.of(project));
         when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
 
         TaskResponse response = taskService.updateProgress(
@@ -386,10 +396,12 @@ class TaskServiceTest {
         );
 
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        when(taskRepository.findById(dependentTaskId))
-            .thenReturn(Optional.of(dependentTask));
-        when(projectRepository.findByIdAndCompanyId(projectId, companyId))
-            .thenReturn(Optional.of(project));
+        when(taskRepository.findById(dependentTaskId)).thenReturn(
+            Optional.of(dependentTask)
+        );
+        when(
+            projectRepository.findByIdAndCompanyId(projectId, companyId)
+        ).thenReturn(Optional.of(project));
         when(
             taskDependencyRepository.existsByTaskIdAndDependsOnTaskId(
                 taskId,
@@ -403,7 +415,9 @@ class TaskServiceTest {
     }
 
     @Test
-    @DisplayName("addDependency - should throw exception when circular dependency detected")
+    @DisplayName(
+        "addDependency - should throw exception when circular dependency detected"
+    )
     void shouldThrowExceptionOnCircularDependency() {
         UUID dependentTaskId = UUID.randomUUID();
         TaskEntity dependentTask = new TaskEntity();
@@ -417,8 +431,9 @@ class TaskServiceTest {
 
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        when(projectRepository.findByIdAndCompanyId(projectId, companyId))
-            .thenReturn(Optional.of(project));
+        when(
+            projectRepository.findByIdAndCompanyId(projectId, companyId)
+        ).thenReturn(Optional.of(project));
 
         assertThatThrownBy(() ->
             taskService.addDependency(companyId, projectId, taskId, request)
@@ -435,10 +450,16 @@ class TaskServiceTest {
         UUID dependencyId = UUID.randomUUID();
 
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        when(projectRepository.findByIdAndCompanyId(projectId, companyId))
-            .thenReturn(Optional.of(project));
+        when(
+            projectRepository.findByIdAndCompanyId(projectId, companyId)
+        ).thenReturn(Optional.of(project));
 
-        taskService.removeDependency(companyId, projectId, taskId, dependencyId);
+        taskService.removeDependency(
+            companyId,
+            projectId,
+            taskId,
+            dependencyId
+        );
 
         verify(taskDependencyRepository).deleteById(dependencyId);
     }

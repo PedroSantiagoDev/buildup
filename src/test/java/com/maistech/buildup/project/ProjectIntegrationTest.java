@@ -194,7 +194,9 @@ class ProjectIntegrationTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getContent()).hasSizeGreaterThanOrEqualTo(2);
+        assertThat(response.getBody().getContent()).hasSizeGreaterThanOrEqualTo(
+            2
+        );
     }
 
     @Test
