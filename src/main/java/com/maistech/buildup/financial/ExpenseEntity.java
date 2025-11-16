@@ -82,7 +82,8 @@ public class ExpenseEntity {
     @OneToMany(
         mappedBy = "expense",
         cascade = CascadeType.ALL,
-        orphanRemoval = true
+        orphanRemoval = true,
+        fetch = FetchType.EAGER
     )
     private List<ExpenseInstallmentEntity> installments = new ArrayList<>();
 

@@ -80,9 +80,10 @@ public class ExpenseService {
             expense.setHasInstallments(true);
             expense = expenseRepository.save(expense);
             createInstallments(expense, request.installments());
+        } else {
+            expense = expenseRepository.save(expense);
         }
 
-        expense = expenseRepository.save(expense);
         return mapToResponse(expense);
     }
 
@@ -323,8 +324,10 @@ public class ExpenseService {
     }
 
     private ExpenseResponse mapToResponse(ExpenseEntity expense) {
-        List<InstallmentResponse> installments = expense
-            .getInstallments()
+        List<ExpenseInstallmentEntity> installmentEntities = 
+            installmentRepository.findByExpenseIdOrderByInstallmentNumberAsc(expense.getId());
+        
+        List<InstallmentResponse> installments = installmentEntities
             .stream()
             .map(i ->
                 new InstallmentResponse(

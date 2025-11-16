@@ -517,6 +517,31 @@ class ExpenseIntegrationTest {
         assertThat(response.getBody().get(0).isOverdue()).isTrue();
     }
 
+    @Test
+    @DisplayName("should list expenses by category")
+    void shouldListExpensesByCategory() {
+        UUID expense1Id = createTestExpense("Material 1", new BigDecimal("500.00"));
+        UUID expense2Id = createTestExpense("Material 2", new BigDecimal("750.00"));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(authToken);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<List<ExpenseResponse>> response = restTemplate.exchange(
+            "/companies/{companyId}/projects/{projectId}/expenses/by-category/{categoryId}",
+            HttpMethod.GET,
+            entity,
+            new ParameterizedTypeReference<List<ExpenseResponse>>() {},
+            companyId,
+            projectId,
+            categoryId
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).hasSizeGreaterThanOrEqualTo(2);
+    }
+
     private UUID createTestExpense(String description, BigDecimal amount) {
         ExpenseEntity expense = new ExpenseEntity();
         expense.setProject(project);

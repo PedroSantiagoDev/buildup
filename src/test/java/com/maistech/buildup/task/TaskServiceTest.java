@@ -180,12 +180,18 @@ class TaskServiceTest {
             Integer.valueOf(50)
         );
 
-        lenient().when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        lenient().when(
-            projectRepository.findByIdAndCompanyId(projectId, companyId)
-        ).thenReturn(Optional.of(project));
-        lenient().when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
-        lenient().when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
+        lenient()
+            .when(taskRepository.findById(taskId))
+            .thenReturn(Optional.of(task));
+        lenient()
+            .when(projectRepository.findByIdAndCompanyId(projectId, companyId))
+            .thenReturn(Optional.of(project));
+        lenient()
+            .when(userRepository.findById(userId))
+            .thenReturn(Optional.of(mockUser));
+        lenient()
+            .when(taskRepository.save(any(TaskEntity.class)))
+            .thenReturn(task);
 
         TaskResponse response = taskService.updateTask(
             companyId,
@@ -228,10 +234,12 @@ class TaskServiceTest {
     @Test
     @DisplayName("deleteTask - should delete task successfully")
     void shouldDeleteTaskSuccessfully() {
-        lenient().when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        lenient().when(
-            projectRepository.findByIdAndCompanyId(projectId, companyId)
-        ).thenReturn(Optional.of(project));
+        lenient()
+            .when(taskRepository.findById(taskId))
+            .thenReturn(Optional.of(task));
+        lenient()
+            .when(projectRepository.findByIdAndCompanyId(projectId, companyId))
+            .thenReturn(Optional.of(project));
 
         taskService.deleteTask(companyId, projectId, taskId);
 
@@ -241,10 +249,12 @@ class TaskServiceTest {
     @Test
     @DisplayName("getTaskById - should return task successfully")
     void shouldGetTaskByIdSuccessfully() {
-        lenient().when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        lenient().when(
-            projectRepository.findByIdAndCompanyId(projectId, companyId)
-        ).thenReturn(Optional.of(project));
+        lenient()
+            .when(taskRepository.findById(taskId))
+            .thenReturn(Optional.of(task));
+        lenient()
+            .when(projectRepository.findByIdAndCompanyId(projectId, companyId))
+            .thenReturn(Optional.of(project));
 
         TaskResponse response = taskService.getTaskById(
             companyId,
@@ -314,11 +324,15 @@ class TaskServiceTest {
     @Test
     @DisplayName("startTask - should update task status to IN_PROGRESS")
     void shouldStartTaskSuccessfully() {
-        lenient().when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        lenient().when(
-            projectRepository.findByIdAndCompanyId(projectId, companyId)
-        ).thenReturn(Optional.of(project));
-        lenient().when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
+        lenient()
+            .when(taskRepository.findById(taskId))
+            .thenReturn(Optional.of(task));
+        lenient()
+            .when(projectRepository.findByIdAndCompanyId(projectId, companyId))
+            .thenReturn(Optional.of(project));
+        lenient()
+            .when(taskRepository.save(any(TaskEntity.class)))
+            .thenReturn(task);
 
         TaskResponse response = taskService.startTask(
             companyId,
@@ -336,11 +350,15 @@ class TaskServiceTest {
     void shouldCompleteTaskSuccessfully() {
         task.setStatus(TaskStatus.IN_PROGRESS);
 
-        lenient().when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        lenient().when(
-            projectRepository.findByIdAndCompanyId(projectId, companyId)
-        ).thenReturn(Optional.of(project));
-        lenient().when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
+        lenient()
+            .when(taskRepository.findById(taskId))
+            .thenReturn(Optional.of(task));
+        lenient()
+            .when(projectRepository.findByIdAndCompanyId(projectId, companyId))
+            .thenReturn(Optional.of(project));
+        lenient()
+            .when(taskRepository.save(any(TaskEntity.class)))
+            .thenReturn(task);
 
         TaskResponse response = taskService.completeTask(
             companyId,
@@ -361,11 +379,15 @@ class TaskServiceTest {
             Integer.valueOf(75)
         );
 
-        lenient().when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        lenient().when(
-            projectRepository.findByIdAndCompanyId(projectId, companyId)
-        ).thenReturn(Optional.of(project));
-        lenient().when(taskRepository.save(any(TaskEntity.class))).thenReturn(task);
+        lenient()
+            .when(taskRepository.findById(taskId))
+            .thenReturn(Optional.of(task));
+        lenient()
+            .when(projectRepository.findByIdAndCompanyId(projectId, companyId))
+            .thenReturn(Optional.of(project));
+        lenient()
+            .when(taskRepository.save(any(TaskEntity.class)))
+            .thenReturn(task);
 
         TaskResponse response = taskService.updateProgress(
             companyId,
@@ -393,19 +415,23 @@ class TaskServiceTest {
             DependencyType.FINISH_TO_START
         );
 
-        lenient().when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        lenient().when(taskRepository.findById(dependentTaskId)).thenReturn(
-            Optional.of(dependentTask)
-        );
-        lenient().when(
-            projectRepository.findByIdAndCompanyId(projectId, companyId)
-        ).thenReturn(Optional.of(project));
-        lenient().when(
-            taskDependencyRepository.existsByTaskIdAndDependsOnTaskId(
-                taskId,
-                dependentTaskId
+        lenient()
+            .when(taskRepository.findById(taskId))
+            .thenReturn(Optional.of(task));
+        lenient()
+            .when(taskRepository.findById(dependentTaskId))
+            .thenReturn(Optional.of(dependentTask));
+        lenient()
+            .when(projectRepository.findByIdAndCompanyId(projectId, companyId))
+            .thenReturn(Optional.of(project));
+        lenient()
+            .when(
+                taskDependencyRepository.existsByTaskIdAndDependsOnTaskId(
+                    taskId,
+                    dependentTaskId
+                )
             )
-        ).thenReturn(false);
+            .thenReturn(false);
 
         taskService.addDependency(companyId, projectId, taskId, request);
 
@@ -427,11 +453,15 @@ class TaskServiceTest {
             DependencyType.FINISH_TO_START
         );
 
-        lenient().when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        lenient().when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        lenient().when(
-            projectRepository.findByIdAndCompanyId(projectId, companyId)
-        ).thenReturn(Optional.of(project));
+        lenient()
+            .when(taskRepository.findById(taskId))
+            .thenReturn(Optional.of(task));
+        lenient()
+            .when(taskRepository.findById(taskId))
+            .thenReturn(Optional.of(task));
+        lenient()
+            .when(projectRepository.findByIdAndCompanyId(projectId, companyId))
+            .thenReturn(Optional.of(project));
 
         assertThatThrownBy(() ->
             taskService.addDependency(companyId, projectId, taskId, request)
@@ -447,10 +477,12 @@ class TaskServiceTest {
     void shouldRemoveDependencySuccessfully() {
         UUID dependencyId = UUID.randomUUID();
 
-        lenient().when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
-        lenient().when(
-            projectRepository.findByIdAndCompanyId(projectId, companyId)
-        ).thenReturn(Optional.of(project));
+        lenient()
+            .when(taskRepository.findById(taskId))
+            .thenReturn(Optional.of(task));
+        lenient()
+            .when(projectRepository.findByIdAndCompanyId(projectId, companyId))
+            .thenReturn(Optional.of(project));
 
         taskService.removeDependency(
             companyId,
@@ -459,6 +491,9 @@ class TaskServiceTest {
             dependencyId
         );
 
-        verify(taskDependencyRepository).deleteByTaskIdAndDependsOnTaskId(taskId, dependencyId);
+        verify(taskDependencyRepository).deleteByTaskIdAndDependsOnTaskId(
+            taskId,
+            dependencyId
+        );
     }
 }
