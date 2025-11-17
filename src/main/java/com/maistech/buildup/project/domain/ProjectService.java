@@ -1,7 +1,8 @@
-package com.maistech.buildup.project;
+package com.maistech.buildup.project.domain;
 
+import com.maistech.buildup.project.*;
 import com.maistech.buildup.auth.UserEntity;
-import com.maistech.buildup.auth.UserRepository;
+import com.maistech.buildup.auth.domain.UserRepository;
 import com.maistech.buildup.project.dto.*;
 import java.util.List;
 import java.util.UUID;

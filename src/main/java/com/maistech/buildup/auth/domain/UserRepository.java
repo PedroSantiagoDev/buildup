@@ -1,5 +1,6 @@
-package com.maistech.buildup.auth;
+package com.maistech.buildup.auth.domain;
 
+import com.maistech.buildup.auth.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

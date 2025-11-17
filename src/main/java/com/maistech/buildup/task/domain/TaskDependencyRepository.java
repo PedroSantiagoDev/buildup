@@ -1,5 +1,6 @@
-package com.maistech.buildup.task;
+package com.maistech.buildup.task.domain;
 
+import com.maistech.buildup.task.TaskDependencyEntity;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;

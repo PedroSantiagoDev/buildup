@@ -1,5 +1,7 @@
-package com.maistech.buildup.financial;
+package com.maistech.buildup.financial.domain;
 
+import com.maistech.buildup.financial.*;
+import com.maistech.buildup.financial.PaymentMilestoneEntity;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;

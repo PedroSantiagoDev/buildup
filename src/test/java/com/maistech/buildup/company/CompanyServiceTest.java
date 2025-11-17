@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import com.maistech.buildup.auth.UserEntity;
-import com.maistech.buildup.auth.UserRepository;
+import com.maistech.buildup.auth.domain.UserRepository;
 import com.maistech.buildup.company.dto.AdminUserRequest;
 import com.maistech.buildup.company.dto.CompanyResponse;
 import com.maistech.buildup.company.dto.CreateCompanyRequest;

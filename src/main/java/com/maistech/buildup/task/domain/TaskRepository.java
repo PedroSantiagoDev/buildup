@@ -1,5 +1,6 @@
-package com.maistech.buildup.task;
+package com.maistech.buildup.task.domain;
 
+import com.maistech.buildup.task.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;

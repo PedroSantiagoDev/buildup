@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.maistech.buildup.auth.UserEntity;
-import com.maistech.buildup.auth.UserRepository;
+import com.maistech.buildup.auth.domain.UserRepository;
 import com.maistech.buildup.company.CompanyEntity;
 import com.maistech.buildup.project.dto.*;
 import java.math.BigDecimal;

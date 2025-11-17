@@ -1,5 +1,7 @@
-package com.maistech.buildup.project;
+package com.maistech.buildup.project.domain;
 
+import com.maistech.buildup.project.*;
+import com.maistech.buildup.project.ProjectStatus;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

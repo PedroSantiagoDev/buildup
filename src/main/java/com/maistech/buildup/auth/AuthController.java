@@ -1,6 +1,7 @@
 package com.maistech.buildup.auth;
 
 import com.maistech.buildup.auth.dto.CreateUserRequest;
+import com.maistech.buildup.auth.domain.AuthService;
 import com.maistech.buildup.auth.dto.LoginRequest;
 import com.maistech.buildup.auth.dto.LoginResponse;
 import com.maistech.buildup.auth.dto.RegisterUserRequest;

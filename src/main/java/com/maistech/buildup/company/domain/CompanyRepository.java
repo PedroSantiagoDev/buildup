@@ -1,5 +1,6 @@
-package com.maistech.buildup.company;
+package com.maistech.buildup.company.domain;
 
+import com.maistech.buildup.company.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

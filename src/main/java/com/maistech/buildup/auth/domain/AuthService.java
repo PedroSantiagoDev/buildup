@@ -1,5 +1,6 @@
-package com.maistech.buildup.auth;
+package com.maistech.buildup.auth.domain;
 
+import com.maistech.buildup.auth.*;
 import com.maistech.buildup.auth.dto.CreateUserRequest;
 import com.maistech.buildup.auth.dto.LoginRequest;
 import com.maistech.buildup.auth.dto.LoginResponse;
@@ -9,7 +10,7 @@ import com.maistech.buildup.auth.dto.UserResponse;
 import com.maistech.buildup.auth.exception.InvalidPasswordException;
 import com.maistech.buildup.auth.exception.UserAlreadyExistsException;
 import com.maistech.buildup.company.CompanyEntity;
-import com.maistech.buildup.company.CompanyRepository;
+import com.maistech.buildup.company.domain.CompanyRepository;
 import com.maistech.buildup.role.RoleEntity;
 import com.maistech.buildup.role.RoleEnum;
 import com.maistech.buildup.role.RoleRepository;

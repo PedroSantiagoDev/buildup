@@ -1,10 +1,11 @@
-package com.maistech.buildup.schedule;
+package com.maistech.buildup.schedule.domain;
 
+import com.maistech.buildup.schedule.*;
 import com.maistech.buildup.project.ProjectEntity;
-import com.maistech.buildup.project.ProjectRepository;
+import com.maistech.buildup.project.domain.ProjectRepository;
 import com.maistech.buildup.schedule.dto.*;
 import com.maistech.buildup.task.TaskEntity;
-import com.maistech.buildup.task.TaskRepository;
+import com.maistech.buildup.task.domain.TaskRepository;
 import com.maistech.buildup.task.TaskStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

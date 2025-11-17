@@ -1,5 +1,6 @@
-package com.maistech.buildup.financial;
+package com.maistech.buildup.financial.domain;
 
+import com.maistech.buildup.financial.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;

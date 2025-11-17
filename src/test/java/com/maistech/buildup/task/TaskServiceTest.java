@@ -6,11 +6,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.maistech.buildup.auth.UserEntity;
-import com.maistech.buildup.auth.UserRepository;
+import com.maistech.buildup.auth.domain.UserRepository;
 import com.maistech.buildup.company.CompanyEntity;
 import com.maistech.buildup.project.ProjectEntity;
 import com.maistech.buildup.project.ProjectNotFoundException;
-import com.maistech.buildup.project.ProjectRepository;
+import com.maistech.buildup.project.domain.ProjectRepository;
 import com.maistech.buildup.task.dto.*;
 import java.time.LocalDate;
 import java.util.List;

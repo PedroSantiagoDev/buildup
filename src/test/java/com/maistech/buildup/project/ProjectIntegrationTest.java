@@ -3,11 +3,11 @@ package com.maistech.buildup.project;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.maistech.buildup.auth.UserEntity;
-import com.maistech.buildup.auth.UserRepository;
+import com.maistech.buildup.auth.domain.UserRepository;
 import com.maistech.buildup.auth.dto.LoginRequest;
 import com.maistech.buildup.auth.dto.LoginResponse;
 import com.maistech.buildup.company.CompanyEntity;
-import com.maistech.buildup.company.CompanyRepository;
+import com.maistech.buildup.company.domain.CompanyRepository;
 import com.maistech.buildup.project.dto.*;
 import com.maistech.buildup.role.RoleEntity;
 import com.maistech.buildup.role.RoleEnum;
