@@ -6,14 +6,11 @@ import static org.mockito.Mockito.*;
 
 import com.maistech.buildup.auth.UserEntity;
 import com.maistech.buildup.auth.domain.UserRepository;
+import com.maistech.buildup.company.domain.*;
 import com.maistech.buildup.company.dto.AdminUserRequest;
-import com.maistech.buildup.company.domain.*;
 import com.maistech.buildup.company.dto.CompanyResponse;
-import com.maistech.buildup.company.domain.*;
 import com.maistech.buildup.company.dto.CreateCompanyRequest;
-import com.maistech.buildup.company.domain.*;
 import com.maistech.buildup.company.dto.UpdateCompanyRequest;
-import com.maistech.buildup.company.domain.*;
 import com.maistech.buildup.role.RoleEntity;
 import com.maistech.buildup.role.RoleEnum;
 import com.maistech.buildup.role.RoleRepository;
@@ -62,11 +59,32 @@ class CompanyServiceTest {
     @BeforeEach
     void setUp() {
         // Configure TenantHelper mock to execute the supplier directly
-        when(tenantHelper.withoutTenantFilter(any(java.util.function.Supplier.class)))
+        lenient()
+            .when(
+                tenantHelper.withoutTenantFilter(
+                    any(java.util.function.Supplier.class)
+                )
+            )
             .thenAnswer(invocation -> {
-                var supplier = invocation.getArgument(0, java.util.function.Supplier.class);
+                var supplier = invocation.getArgument(
+                    0,
+                    java.util.function.Supplier.class
+                );
                 return supplier.get();
             });
+
+        // Configure TenantHelper mock for Runnable (void methods)
+        lenient()
+            .doAnswer(invocation -> {
+                var runnable = invocation.getArgument(
+                    0,
+                    java.lang.Runnable.class
+                );
+                runnable.run();
+                return null;
+            })
+            .when(tenantHelper)
+            .withoutTenantFilter(any(java.lang.Runnable.class));
 
         masterCompanyId = UUID.randomUUID();
         masterCompany = new CompanyEntity();
