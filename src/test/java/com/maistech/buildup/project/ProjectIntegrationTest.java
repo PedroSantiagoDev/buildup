@@ -9,6 +9,7 @@ import com.maistech.buildup.auth.dto.LoginResponse;
 import com.maistech.buildup.company.CompanyEntity;
 import com.maistech.buildup.company.domain.CompanyRepository;
 import com.maistech.buildup.project.dto.*;
+import com.maistech.buildup.project.domain.*;
 import com.maistech.buildup.role.RoleEntity;
 import com.maistech.buildup.role.RoleEnum;
 import com.maistech.buildup.role.RoleRepository;

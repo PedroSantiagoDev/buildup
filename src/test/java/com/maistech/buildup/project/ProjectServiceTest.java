@@ -9,6 +9,7 @@ import com.maistech.buildup.auth.UserEntity;
 import com.maistech.buildup.auth.domain.UserRepository;
 import com.maistech.buildup.company.CompanyEntity;
 import com.maistech.buildup.project.dto.*;
+import com.maistech.buildup.project.domain.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;

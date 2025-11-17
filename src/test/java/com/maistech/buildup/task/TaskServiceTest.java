@@ -12,6 +12,7 @@ import com.maistech.buildup.project.ProjectEntity;
 import com.maistech.buildup.project.ProjectNotFoundException;
 import com.maistech.buildup.project.domain.ProjectRepository;
 import com.maistech.buildup.task.dto.*;
+import com.maistech.buildup.task.domain.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
