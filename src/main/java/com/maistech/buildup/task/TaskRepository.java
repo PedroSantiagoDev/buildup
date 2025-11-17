@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TaskRepository extends JpaRepository<TaskEntity, UUID> {
+    List<TaskEntity> findByProjectId(UUID projectId);
+    
     List<TaskEntity> findByProjectIdOrderByOrderIndexAsc(UUID projectId);
 
     List<TaskEntity> findByProjectIdAndStatus(

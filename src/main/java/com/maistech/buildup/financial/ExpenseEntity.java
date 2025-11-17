@@ -2,30 +2,23 @@ package com.maistech.buildup.financial;
 
 import com.maistech.buildup.auth.UserEntity;
 import com.maistech.buildup.project.ProjectEntity;
+import com.maistech.buildup.shared.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "expenses")
 @Getter
 @Setter
-public class ExpenseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+public class ExpenseEntity extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
@@ -86,14 +79,6 @@ public class ExpenseEntity {
         fetch = FetchType.EAGER
     )
     private List<ExpenseInstallmentEntity> installments = new ArrayList<>();
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
 
     // ============ Domain Logic ============
 
@@ -182,5 +167,13 @@ public class ExpenseEntity {
             LocalDate.now(),
             dueDate
         );
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void syncCompanyId() {
+        if (project != null && getCompanyId() == null) {
+            setCompanyId(project.getCompanyId());
+        }
     }
 }

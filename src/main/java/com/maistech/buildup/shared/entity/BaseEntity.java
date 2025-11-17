@@ -25,6 +25,7 @@ public abstract class BaseEntity implements TenantAware {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Setter
     private UUID id;
 
     @Column(name = "company_id", nullable = false)

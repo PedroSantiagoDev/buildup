@@ -44,6 +44,9 @@ class CompanyServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private com.maistech.buildup.shared.tenant.TenantHelper tenantHelper;
+
     @InjectMocks
     private CompanyService companyService;
 
@@ -54,6 +57,13 @@ class CompanyServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Configure TenantHelper mock to execute the supplier directly
+        when(tenantHelper.withoutTenantFilter(any(java.util.function.Supplier.class)))
+            .thenAnswer(invocation -> {
+                var supplier = invocation.getArgument(0, java.util.function.Supplier.class);
+                return supplier.get();
+            });
+
         masterCompanyId = UUID.randomUUID();
         masterCompany = new CompanyEntity();
         masterCompany.setId(masterCompanyId);
