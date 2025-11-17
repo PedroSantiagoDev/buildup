@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.maistech.buildup.auth.domain.AuthService;
+import com.maistech.buildup.auth.domain.UserRepository;
 import com.maistech.buildup.auth.dto.LoginRequest;
 import com.maistech.buildup.auth.dto.RegisterUserRequest;
 import com.maistech.buildup.auth.exception.InvalidPasswordException;
