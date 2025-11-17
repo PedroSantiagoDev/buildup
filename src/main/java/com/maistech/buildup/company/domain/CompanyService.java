@@ -48,7 +48,7 @@ public class CompanyService {
         CreateCompanyRequest request,
         UUID masterCompanyId
     ) {
-        return tenantHelper.withoutTenantFilter(() -> {
+        return tenantHelper.<CompanyResponse>withoutTenantFilter(() -> {
             validateDocumentDoesNotExist(request.document());
 
             CompanyEntity masterCompany = companyRepository
@@ -84,7 +84,7 @@ public class CompanyService {
         UUID requestingCompanyId,
         boolean isMaster
     ) {
-        return tenantHelper.withoutTenantFilter(() -> {
+        return tenantHelper.<CompanyResponse>withoutTenantFilter(() -> {
             validateCompanyAccess(requestingCompanyId, companyId, isMaster);
             CompanyEntity company = findCompanyOrThrow(companyId);
 
@@ -110,7 +110,7 @@ public class CompanyService {
     }
 
     public void deactivateCompany(UUID companyId) {
-        tenantHelper.withoutTenantFilter(() -> {
+        tenantHelper.withoutTenantFilter((Runnable) () -> {
             CompanyEntity company = findCompanyOrThrow(companyId);
             company.setIsActive(false);
             companyRepository.save(company);
@@ -118,7 +118,7 @@ public class CompanyService {
     }
 
     public void activateCompany(UUID companyId) {
-        tenantHelper.withoutTenantFilter(() -> {
+        tenantHelper.withoutTenantFilter((Runnable) () -> {
             CompanyEntity company = findCompanyOrThrow(companyId);
             company.setIsActive(true);
             companyRepository.save(company);
@@ -127,7 +127,7 @@ public class CompanyService {
 
     @Transactional(readOnly = true)
     public CompanyResponse getCompanyById(UUID companyId, UUID requestingCompanyId, boolean isMaster) {
-        return tenantHelper.withoutTenantFilter(() -> {
+        return tenantHelper.<CompanyResponse>withoutTenantFilter(() -> {
             validateCompanyAccess(requestingCompanyId, companyId, isMaster);
             CompanyEntity company = findCompanyOrThrow(companyId);
             return mapToResponse(company);
@@ -136,7 +136,7 @@ public class CompanyService {
 
     @Transactional(readOnly = true)
     public List<CompanyResponse> listAllCompanies() {
-        return tenantHelper.withoutTenantFilter(() ->
+        return tenantHelper.<List<CompanyResponse>>withoutTenantFilter(() ->
             companyRepository
                 .findAll()
                 .stream()
@@ -147,14 +147,14 @@ public class CompanyService {
 
     @Transactional(readOnly = true)
     public Page<CompanyResponse> listAllCompanies(Pageable pageable) {
-        return tenantHelper.withoutTenantFilter(() ->
+        return tenantHelper.<Page<CompanyResponse>>withoutTenantFilter(() ->
             companyRepository.findAll(pageable).map(this::mapToResponse)
         );
     }
 
     @Transactional(readOnly = true)
     public List<CompanyResponse> listClientCompanies(UUID masterCompanyId) {
-        return tenantHelper.withoutTenantFilter(() ->
+        return tenantHelper.<List<CompanyResponse>>withoutTenantFilter(() ->
             companyRepository
                 .findAllClientCompanies(masterCompanyId)
                 .stream()
