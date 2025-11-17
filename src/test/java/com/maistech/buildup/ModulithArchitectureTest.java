@@ -6,7 +6,7 @@ import org.springframework.modulith.docs.Documenter;
 
 /**
  * Validates the modular architecture of the application using Spring Modulith.
- * 
+ *
  * This test ensures that:
  * - All modules are properly defined
  * - Dependencies between modules are respected
@@ -15,7 +15,9 @@ import org.springframework.modulith.docs.Documenter;
  */
 class ModulithArchitectureTest {
 
-    private final ApplicationModules modules = ApplicationModules.of(BuildupApplication.class);
+    private final ApplicationModules modules = ApplicationModules.of(
+        BuildupApplication.class
+    );
 
     /**
      * Verifies that all module boundaries are respected.
@@ -35,7 +37,7 @@ class ModulithArchitectureTest {
      * - Module diagrams (PlantUML)
      * - Module dependency canvas
      * - Application module structure documentation
-     * 
+     *
      * Output location: target/spring-modulith-docs
      */
     @Test
@@ -56,7 +58,9 @@ class ModulithArchitectureTest {
             System.out.println("Module: " + module.getName());
             System.out.println("  Display Name: " + module.getDisplayName());
             System.out.println("  Base Package: " + module.getBasePackage());
-            System.out.println("  Dependencies: " + module.getDependencies(modules));
+            System.out.println(
+                "  Dependencies: " + module.getDependencies(modules)
+            );
             System.out.println();
         });
     }
