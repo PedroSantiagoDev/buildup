@@ -1,12 +1,13 @@
 package com.maistech.buildup.auth;
 
 import com.maistech.buildup.auth.dto.CreateUserRequest;
+import com.maistech.buildup.auth.domain.AuthService;
 import com.maistech.buildup.auth.dto.LoginRequest;
 import com.maistech.buildup.auth.dto.LoginResponse;
 import com.maistech.buildup.auth.dto.RegisterUserRequest;
 import com.maistech.buildup.auth.dto.RegisterUserResponse;
 import com.maistech.buildup.auth.dto.UserResponse;
-import com.maistech.buildup.shared.config.JWTUserData;
+import com.maistech.buildup.shared.security.JWTUserData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

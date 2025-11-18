@@ -5,16 +5,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "Project status enumeration")
 public enum ProjectStatus {
     @Schema(description = "Project is currently in progress")
-    IN_PROGRESS("Em Andamento"),
-    
+    IN_PROGRESS("In Progress"),
+
     @Schema(description = "Project has been completed")
-    COMPLETED("Concluído"),
-    
+    COMPLETED("Completed"),
+
     @Schema(description = "Project is temporarily on hold/paused")
-    ON_HOLD("Pausado"),
-    
+    ON_HOLD("On Hold"),
+
     @Schema(description = "Project has been cancelled")
-    CANCELLED("Cancelado");
+    CANCELLED("Cancelled");
 
     private final String displayName;
 

@@ -2,10 +2,17 @@ package com.maistech.buildup.company;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.maistech.buildup.auth.UserEntity;
-import com.maistech.buildup.auth.UserRepository;
+import com.maistech.buildup.auth.domain.UserRepository;
+import com.maistech.buildup.tenant.CompanyEntity;
+import com.maistech.buildup.tenant.CompanyRepository;
+import com.maistech.buildup.company.domain.*;
 import com.maistech.buildup.company.dto.AdminUserRequest;
 import com.maistech.buildup.company.dto.CompanyResponse;
 import com.maistech.buildup.company.dto.CreateCompanyRequest;
@@ -44,6 +51,9 @@ class CompanyServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private com.maistech.buildup.tenant.TenantHelper tenantHelper;
+
     @InjectMocks
     private CompanyService companyService;
 
@@ -54,7 +64,8 @@ class CompanyServiceTest {
 
     @BeforeEach
     void setUp() {
-        masterCompanyId = UUID.randomUUID();
+        setupTenantHelperMock();
+        setupMasterCompany();
         masterCompany = new CompanyEntity();
         masterCompany.setId(masterCompanyId);
         masterCompany.setName("Master Company");
@@ -78,6 +89,38 @@ class CompanyServiceTest {
             "https://logo.url",
             adminUserRequest
         );
+    }
+
+    private void setupTenantHelperMock() {
+        lenient()
+            .when(
+                tenantHelper.withoutTenantFilter(
+                    any(java.util.function.Supplier.class)
+                )
+            )
+            .thenAnswer(invocation -> {
+                var supplier = invocation.getArgument(
+                    0,
+                    java.util.function.Supplier.class
+                );
+                return supplier.get();
+            });
+
+        lenient()
+            .doAnswer(invocation -> {
+                var runnable = invocation.getArgument(
+                    0,
+                    java.lang.Runnable.class
+                );
+                runnable.run();
+                return null;
+            })
+            .when(tenantHelper)
+            .withoutTenantFilter(any(java.lang.Runnable.class));
+    }
+
+    private void setupMasterCompany() {
+        masterCompanyId = UUID.randomUUID();
     }
 
     @Test

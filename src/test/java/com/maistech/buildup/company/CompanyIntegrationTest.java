@@ -2,9 +2,12 @@ package com.maistech.buildup.company;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.maistech.buildup.auth.UserRepository;
+import com.maistech.buildup.auth.domain.UserRepository;
 import com.maistech.buildup.auth.dto.LoginRequest;
 import com.maistech.buildup.auth.dto.LoginResponse;
+import com.maistech.buildup.tenant.CompanyEntity;
+import com.maistech.buildup.tenant.CompanyRepository;
+import com.maistech.buildup.company.domain.*;
 import com.maistech.buildup.company.dto.AdminUserRequest;
 import com.maistech.buildup.company.dto.CompanyResponse;
 import com.maistech.buildup.company.dto.CreateCompanyRequest;

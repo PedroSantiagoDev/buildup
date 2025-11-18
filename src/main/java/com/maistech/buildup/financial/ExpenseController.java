@@ -1,7 +1,8 @@
 package com.maistech.buildup.financial;
 
 import com.maistech.buildup.financial.dto.*;
-import com.maistech.buildup.shared.config.JWTUserData;
+import com.maistech.buildup.financial.domain.ExpenseService;
+import com.maistech.buildup.shared.security.JWTUserData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

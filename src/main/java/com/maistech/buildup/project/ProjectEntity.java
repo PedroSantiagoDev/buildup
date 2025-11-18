@@ -1,31 +1,24 @@
 package com.maistech.buildup.project;
 
 import com.maistech.buildup.auth.UserEntity;
-import com.maistech.buildup.company.CompanyEntity;
-import com.maistech.buildup.shared.tenant.TenantAware;
+import com.maistech.buildup.tenant.CompanyEntity;
+import com.maistech.buildup.shared.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "projects")
 @Getter
 @Setter
-public class ProjectEntity implements TenantAware {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+public class ProjectEntity extends BaseEntity {
 
     @NotBlank(message = "Project name is required")
     @Column(nullable = false)
@@ -57,9 +50,6 @@ public class ProjectEntity implements TenantAware {
     @NotNull
     private ProjectStatus status = ProjectStatus.IN_PROGRESS;
 
-    @Column(name = "company_id", nullable = false)
-    private UUID companyId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", insertable = false, updatable = false)
     private CompanyEntity company;
@@ -74,24 +64,6 @@ public class ProjectEntity implements TenantAware {
         orphanRemoval = true
     )
     private List<ProjectMemberEntity> members = new ArrayList<>();
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    @Override
-    public UUID getCompanyId() {
-        return companyId;
-    }
-
-    @Override
-    public void setCompanyId(UUID companyId) {
-        this.companyId = companyId;
-    }
 
     public boolean isOverdue() {
         return (

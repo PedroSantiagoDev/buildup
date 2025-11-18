@@ -2,28 +2,22 @@ package com.maistech.buildup.task;
 
 import com.maistech.buildup.auth.UserEntity;
 import com.maistech.buildup.project.ProjectEntity;
+import com.maistech.buildup.shared.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "tasks")
 @Getter
 @Setter
-public class TaskEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+public class TaskEntity extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
@@ -82,14 +76,6 @@ public class TaskEntity {
         orphanRemoval = true
     )
     private List<TaskDependencyEntity> dependentTasks = new ArrayList<>();
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
 
     // ============ Domain Logic ============
 
@@ -184,6 +170,14 @@ public class TaskEntity {
     public void calculateEndDateFromDuration() {
         if (startDate != null && durationDays != null) {
             this.endDate = startDate.plusDays(durationDays - 1);
+        }
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void syncCompanyId() {
+        if (project != null && getCompanyId() == null) {
+            setCompanyId(project.getCompanyId());
         }
     }
 }

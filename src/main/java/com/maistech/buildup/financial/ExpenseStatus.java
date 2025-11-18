@@ -1,10 +1,10 @@
 package com.maistech.buildup.financial;
 
 public enum ExpenseStatus {
-    PENDING("Pendente"),
-    PAID("Pago"),
-    OVERDUE("Vencido"),
-    CANCELLED("Cancelado");
+    PENDING("Pending"),
+    PAID("Paid"),
+    OVERDUE("Overdue"),
+    CANCELLED("Cancelled");
 
     private final String displayName;
 

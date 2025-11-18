@@ -6,9 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.maistech.buildup.auth.UserEntity;
-import com.maistech.buildup.auth.UserRepository;
-import com.maistech.buildup.company.CompanyEntity;
+import com.maistech.buildup.auth.domain.UserRepository;
+import com.maistech.buildup.tenant.CompanyEntity;
 import com.maistech.buildup.project.dto.*;
+import com.maistech.buildup.project.domain.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -67,10 +68,10 @@ class ProjectServiceTest {
         user.setCompany(company);
 
         mockUser = mock(UserEntity.class);
-        when(mockUser.getId()).thenReturn(userId);
-        when(mockUser.getName()).thenReturn("John Doe");
-        when(mockUser.getEmail()).thenReturn("john@example.com");
-        when(mockUser.getCompany()).thenReturn(company);
+        lenient().when(mockUser.getId()).thenReturn(userId);
+        lenient().when(mockUser.getName()).thenReturn("John Doe");
+        lenient().when(mockUser.getEmail()).thenReturn("john@example.com");
+        lenient().when(mockUser.getCompany()).thenReturn(company);
 
         project = new ProjectEntity();
         project.setId(projectId);
@@ -370,8 +371,8 @@ class ProjectServiceTest {
     void shouldThrowExceptionWhenUserAlreadyMember() {
         UUID existingMemberId = UUID.randomUUID();
         UserEntity existingMember = mock(UserEntity.class);
-        when(existingMember.getId()).thenReturn(existingMemberId);
-        when(existingMember.getCompany()).thenReturn(company);
+        lenient().when(existingMember.getId()).thenReturn(existingMemberId);
+        lenient().when(existingMember.getCompany()).thenReturn(company);
 
         AddMemberRequest request = new AddMemberRequest(
             existingMemberId,

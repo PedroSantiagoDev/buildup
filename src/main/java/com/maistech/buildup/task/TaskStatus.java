@@ -1,11 +1,11 @@
 package com.maistech.buildup.task;
 
 public enum TaskStatus {
-    PENDING("Pendente"),
-    IN_PROGRESS("Em Andamento"),
-    COMPLETED("Concluída"),
-    CANCELLED("Cancelada"),
-    BLOCKED("Bloqueada");
+    PENDING("Pending"),
+    IN_PROGRESS("In Progress"),
+    COMPLETED("Completed"),
+    CANCELLED("Cancelled"),
+    BLOCKED("Blocked");
 
     private final String displayName;
 

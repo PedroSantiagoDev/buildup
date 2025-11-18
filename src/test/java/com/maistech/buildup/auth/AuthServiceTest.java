@@ -5,11 +5,18 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.maistech.buildup.auth.domain.AuthService;
+import com.maistech.buildup.auth.domain.UserRepository;
 import com.maistech.buildup.auth.dto.LoginRequest;
 import com.maistech.buildup.auth.dto.RegisterUserRequest;
 import com.maistech.buildup.auth.exception.InvalidPasswordException;
 import com.maistech.buildup.auth.exception.UserAlreadyExistsException;
-import com.maistech.buildup.shared.config.TokenConfig;
+import com.maistech.buildup.auth.config.TokenConfig;
+import com.maistech.buildup.tenant.CompanyEntity;
+import com.maistech.buildup.tenant.CompanyRepository;
+import com.maistech.buildup.role.RoleRepository;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,6 +33,12 @@ class AuthServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private CompanyRepository companyRepository;
+
+    @Mock
+    private RoleRepository roleRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -46,18 +59,28 @@ class AuthServiceTest {
             "password123"
         );
 
-        UserEntity user = new UserEntity();
-        user.setEmail("john@example.com");
-        user.setName("John Doe");
+        UUID userId = UUID.randomUUID();
+        UserEntity authenticatedUser = new UserEntity();
+        authenticatedUser.setEmail("john@example.com");
+        authenticatedUser.setName("John Doe");
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-            user,
+            authenticatedUser,
             null
         );
         when(authenticationManager.authenticate(any())).thenReturn(
             authentication
         );
-        when(tokenConfig.generateToken(user)).thenReturn("mock-jwt-token");
+
+        UserEntity userWithDetails = new UserEntity();
+        userWithDetails.setEmail("john@example.com");
+        userWithDetails.setName("John Doe");
+
+        when(userRepository.findByIdWithCompanyAndRoles(null))
+            .thenReturn(Optional.of(userWithDetails));
+        when(tokenConfig.generateToken(userWithDetails)).thenReturn(
+            "mock-jwt-token"
+        );
 
         var response = authService.login(request);
 
@@ -66,7 +89,8 @@ class AuthServiceTest {
         assertThat(response.name()).isEqualTo("John Doe");
 
         verify(authenticationManager).authenticate(any());
-        verify(tokenConfig).generateToken(user);
+        verify(userRepository).findByIdWithCompanyAndRoles(null);
+        verify(tokenConfig).generateToken(userWithDetails);
     }
 
     @Test
@@ -108,15 +132,23 @@ class AuthServiceTest {
 
     @Test
     void shouldRegisterUserWhenEmailDoesNotExist() {
+        UUID companyId = UUID.randomUUID();
         RegisterUserRequest request = new RegisterUserRequest(
             "John Doe",
             "john@example.com",
             "password123",
-            null
+            companyId
         );
+
+        CompanyEntity company = new CompanyEntity();
+        company.setId(companyId);
+        company.setName("Test Company");
 
         when(userRepository.existsByEmail("john@example.com")).thenReturn(
             false
+        );
+        when(companyRepository.findById(companyId)).thenReturn(
+            Optional.of(company)
         );
         when(passwordEncoder.encode("password123")).thenReturn(
             "encodedPassword"
@@ -135,6 +167,7 @@ class AuthServiceTest {
         assertThat(response.email()).isEqualTo("john@example.com");
 
         verify(userRepository).existsByEmail("john@example.com");
+        verify(companyRepository).findById(companyId);
         verify(passwordEncoder).encode("password123");
         verify(userRepository).save(any(UserEntity.class));
     }
