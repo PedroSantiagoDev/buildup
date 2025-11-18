@@ -4,7 +4,7 @@ import com.maistech.buildup.company.dto.CompanyResponse;
 import com.maistech.buildup.company.domain.CompanyService;
 import com.maistech.buildup.company.dto.CreateCompanyRequest;
 import com.maistech.buildup.company.dto.UpdateCompanyRequest;
-import com.maistech.buildup.shared.config.JWTUserData;
+import com.maistech.buildup.shared.security.JWTUserData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

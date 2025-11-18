@@ -2,7 +2,7 @@ package com.maistech.buildup.schedule;
 
 import com.maistech.buildup.schedule.dto.*;
 import com.maistech.buildup.schedule.domain.ScheduleService;
-import com.maistech.buildup.shared.config.JWTUserData;
+import com.maistech.buildup.shared.security.JWTUserData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;

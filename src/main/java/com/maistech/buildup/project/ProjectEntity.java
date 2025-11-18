@@ -1,7 +1,7 @@
 package com.maistech.buildup.project;
 
 import com.maistech.buildup.auth.UserEntity;
-import com.maistech.buildup.company.CompanyEntity;
+import com.maistech.buildup.tenant.CompanyEntity;
 import com.maistech.buildup.shared.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

@@ -1,6 +1,8 @@
 package com.maistech.buildup.company.domain;
 
-import com.maistech.buildup.company.*;
+import com.maistech.buildup.tenant.CompanyEntity;
+import com.maistech.buildup.tenant.CompanyRepository;
+import com.maistech.buildup.company.CompanyNotFoundException;
 import com.maistech.buildup.auth.UserEntity;
 import com.maistech.buildup.auth.domain.UserRepository;
 import com.maistech.buildup.company.dto.AdminUserRequest;
@@ -10,7 +12,7 @@ import com.maistech.buildup.company.dto.UpdateCompanyRequest;
 import com.maistech.buildup.role.RoleEntity;
 import com.maistech.buildup.role.RoleEnum;
 import com.maistech.buildup.role.RoleRepository;
-import com.maistech.buildup.shared.tenant.TenantHelper;
+import com.maistech.buildup.tenant.TenantHelper;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;

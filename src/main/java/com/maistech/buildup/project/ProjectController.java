@@ -2,7 +2,7 @@ package com.maistech.buildup.project;
 
 import com.maistech.buildup.project.dto.*;
 import com.maistech.buildup.project.domain.ProjectService;
-import com.maistech.buildup.shared.config.JWTUserData;
+import com.maistech.buildup.shared.security.JWTUserData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
