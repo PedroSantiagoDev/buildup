@@ -1,5 +1,8 @@
 package com.maistech.buildup.financial;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum PaymentMethod {
     DINHEIRO("Dinheiro"),
     PIX("PIX"),
@@ -15,7 +18,18 @@ public enum PaymentMethod {
         this.displayName = displayName;
     }
 
+    @JsonValue
     public String getDisplayName() {
         return displayName;
+    }
+
+    @JsonCreator
+    public static PaymentMethod fromString(String value) {
+        for (PaymentMethod method : PaymentMethod.values()) {
+            if (method.displayName.equals(value) || method.name().equals(value)) {
+                return method;
+            }
+        }
+        throw new IllegalArgumentException("Unknown PaymentMethod: " + value);
     }
 }

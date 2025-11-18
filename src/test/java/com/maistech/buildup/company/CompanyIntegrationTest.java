@@ -58,8 +58,15 @@ class CompanyIntegrationTest {
 
     @AfterEach
     void cleanup() {
-        companyRepository.deleteAll();
-        userRepository.deleteAll();
+        // Delete all users except superadmin
+        userRepository.findAll().stream()
+            .filter(user -> !user.getEmail().equals("superadmin@buildup.com"))
+            .forEach(userRepository::delete);
+
+        // Delete all companies except master company
+        companyRepository.findAll().stream()
+            .filter(company -> !company.getIsMaster())
+            .forEach(companyRepository::delete);
     }
 
     @Test
@@ -195,7 +202,7 @@ class CompanyIntegrationTest {
     private String loginAsSuperAdmin() {
         LoginRequest loginRequest = new LoginRequest(
             "superadmin@buildup.com",
-            "admin123"
+            "Admin@123"
         );
 
         ResponseEntity<LoginResponse> response = restTemplate.postForEntity(

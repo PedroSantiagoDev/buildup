@@ -1,5 +1,7 @@
 package com.maistech.buildup.project;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Project status enumeration")
@@ -22,7 +24,18 @@ public enum ProjectStatus {
         this.displayName = displayName;
     }
 
+    @JsonValue
     public String getDisplayName() {
         return displayName;
+    }
+
+    @JsonCreator
+    public static ProjectStatus fromString(String value) {
+        for (ProjectStatus status : ProjectStatus.values()) {
+            if (status.displayName.equals(value) || status.name().equals(value)) {
+                return status;
+            }
+        }
+        throw new IllegalArgumentException("Unknown ProjectStatus: " + value);
     }
 }
