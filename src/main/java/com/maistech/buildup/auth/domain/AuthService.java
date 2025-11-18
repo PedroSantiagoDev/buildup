@@ -104,6 +104,7 @@ public class AuthService {
     }
 
     private UserEntity createUserFromRequest(RegisterUserRequest request) {
+<<<<<<< HEAD
         CompanyEntity company = findCompanyOrThrow(request.companyId());
         return buildUserEntity(
             request.name(),
@@ -136,6 +137,43 @@ public class AuthService {
                     "Company not found: " + companyId
                 )
             );
+=======
+        var user = new UserEntity();
+        user.setName(request.name());
+        user.setEmail(request.email());
+        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setIsActive(true);
+
+        // If companyId is null, use master company
+        CompanyEntity company;
+        if (request.companyId() == null) {
+            company = companyRepository
+                .findMasterCompany()
+                .orElseThrow(() ->
+                    new IllegalStateException("Master company not found")
+                );
+        } else {
+            company = companyRepository
+                .findById(request.companyId())
+                .orElseThrow(() ->
+                    new IllegalArgumentException(
+                        "Company not found: " + request.companyId()
+                    )
+                );
+        }
+
+        user.setCompany(company);
+
+        // Assign default USER role if no roles specified
+        RoleEntity userRole = roleRepository
+            .findByName(RoleEnum.USER.name())
+            .orElseThrow(() ->
+                new IllegalStateException("USER role not found")
+            );
+        user.assignRole(userRole);
+
+        return user;
+>>>>>>> 215da15 (fix: enable user registration and improve auth flow)
     }
 
     public UserResponse createUser(CreateUserRequest request, UUID companyId) {
