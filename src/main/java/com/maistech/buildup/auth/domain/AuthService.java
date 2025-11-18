@@ -9,12 +9,14 @@ import com.maistech.buildup.auth.dto.RegisterUserResponse;
 import com.maistech.buildup.auth.dto.UserResponse;
 import com.maistech.buildup.auth.exception.InvalidPasswordException;
 import com.maistech.buildup.auth.exception.UserAlreadyExistsException;
-import com.maistech.buildup.company.CompanyEntity;
-import com.maistech.buildup.company.domain.CompanyRepository;
+import com.maistech.buildup.auth.exception.UserNotFoundException;
+import com.maistech.buildup.tenant.CompanyEntity;
+import com.maistech.buildup.tenant.CompanyRepository;
 import com.maistech.buildup.role.RoleEntity;
 import com.maistech.buildup.role.RoleEnum;
 import com.maistech.buildup.role.RoleRepository;
-import com.maistech.buildup.shared.config.TokenConfig;
+import com.maistech.buildup.auth.config.TokenConfig;
+import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -58,11 +60,14 @@ public class AuthService {
         );
 
         var authentication = authenticationManager.authenticate(credentials);
-        var user = (UserEntity) authentication.getPrincipal();
+        var authenticatedUser = (UserEntity) authentication.getPrincipal();
+        UUID userId = authenticatedUser.getId();
 
-        user = userRepository
-            .findByIdWithCompanyAndRoles(user.getId())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+        var user = userRepository
+            .findByIdWithCompanyAndRoles(userId)
+            .orElseThrow(() ->
+                new UserNotFoundException("User not found with id: " + userId)
+            );
 
         var token = tokenConfig.generateToken(user);
 
@@ -99,68 +104,81 @@ public class AuthService {
     }
 
     private UserEntity createUserFromRequest(RegisterUserRequest request) {
-        var user = new UserEntity();
-        user.setName(request.name());
-        user.setEmail(request.email());
-        user.setPassword(passwordEncoder.encode(request.password()));
+        CompanyEntity company = findCompanyOrThrow(request.companyId());
+        return buildUserEntity(
+            request.name(),
+            request.email(),
+            request.password(),
+            company
+        );
+    }
 
-        CompanyEntity company = companyRepository
-            .findById(request.companyId())
+    private UserEntity buildUserEntity(
+        String name,
+        String email,
+        String password,
+        CompanyEntity company
+    ) {
+        var user = new UserEntity();
+        user.setName(name);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setCompany(company);
+        user.setIsActive(true);
+        return user;
+    }
+
+    private CompanyEntity findCompanyOrThrow(UUID companyId) {
+        return companyRepository
+            .findById(companyId)
             .orElseThrow(() ->
                 new IllegalArgumentException(
-                    "Company not found: " + request.companyId()
+                    "Company not found: " + companyId
                 )
             );
-
-        user.setCompany(company);
-
-        return user;
     }
 
     public UserResponse createUser(CreateUserRequest request, UUID companyId) {
         validateUserDoesNotExist(request.email());
         validatePasswordStrength(request.password());
 
-        CompanyEntity company = companyRepository
-            .findById(companyId)
-            .orElseThrow(() ->
-                new IllegalArgumentException("Company not found")
-            );
+        CompanyEntity company = findCompanyOrThrow(companyId);
+        UserEntity user = buildUserEntity(
+            request.name(),
+            request.email(),
+            request.password(),
+            company
+        );
 
-        UserEntity user = new UserEntity();
-        user.setName(request.name());
-        user.setEmail(request.email());
-        user.setPassword(passwordEncoder.encode(request.password()));
-        user.setCompany(company);
-        user.setIsActive(true);
+        assignRolesToUser(user, request.roles());
 
-        if (request.roles() != null && !request.roles().isEmpty()) {
-            Set<RoleEntity> rolesToAssign = request
-                .roles()
+        UserEntity saved = userRepository.save(user);
+        return mapToUserResponse(saved);
+    }
+
+    private void assignRolesToUser(
+        UserEntity user,
+        Collection<String> roleNames
+    ) {
+        if (roleNames != null && !roleNames.isEmpty()) {
+            Set<RoleEntity> rolesToAssign = roleNames
                 .stream()
-                .map(roleName ->
-                    roleRepository
-                        .findByName(roleName)
-                        .orElseThrow(() ->
-                            new IllegalArgumentException(
-                                "Role not found: " + roleName
-                            )
-                        )
-                )
+                .map(this::findRoleOrThrow)
                 .collect(Collectors.toSet());
 
             user.assignRoles(rolesToAssign);
         } else {
-            RoleEntity userRole = roleRepository
-                .findByName(RoleEnum.USER.name())
-                .orElseThrow(() ->
-                    new IllegalStateException("USER role not found")
-                );
-            user.assignRole(userRole);
+            RoleEntity defaultRole = findRoleOrThrow(RoleEnum.USER.name());
+            user.assignRole(defaultRole);
         }
+    }
 
-        UserEntity saved = userRepository.save(user);
-        return mapToUserResponse(saved);
+    private RoleEntity findRoleOrThrow(String roleName) {
+        return roleRepository
+            .findByName(roleName)
+            .orElseThrow(() ->
+                new IllegalArgumentException("Role not found: " + roleName)
+            );
     }
 
     private UserResponse mapToUserResponse(UserEntity user) {
@@ -173,7 +191,7 @@ public class AuthService {
             user
                 .getRoles()
                 .stream()
-                .map(r -> r.getName())
+                .map(RoleEntity::getName)
                 .collect(Collectors.toList()),
             user.getIsActive(),
             user.getCreatedAt()

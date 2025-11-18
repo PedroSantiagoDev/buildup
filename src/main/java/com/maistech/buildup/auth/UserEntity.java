@@ -1,10 +1,10 @@
 package com.maistech.buildup.auth;
 
-import com.maistech.buildup.company.CompanyEntity;
+import com.maistech.buildup.tenant.CompanyEntity;
 import com.maistech.buildup.role.RoleEntity;
 import com.maistech.buildup.role.RoleEnum;
-import com.maistech.buildup.shared.tenant.TenantAware;
-import com.maistech.buildup.shared.tenant.TenantListener;
+import com.maistech.buildup.shared.multitenancy.TenantAware;
+import com.maistech.buildup.shared.multitenancy.TenantListener;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -43,7 +43,7 @@ public class UserEntity implements UserDetails, TenantAware {
     @JoinColumn(name = "company_id")
     private CompanyEntity company;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "user_roles",
         joinColumns = @JoinColumn(name = "user_id"),
