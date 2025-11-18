@@ -104,40 +104,6 @@ public class AuthService {
     }
 
     private UserEntity createUserFromRequest(RegisterUserRequest request) {
-<<<<<<< HEAD
-        CompanyEntity company = findCompanyOrThrow(request.companyId());
-        return buildUserEntity(
-            request.name(),
-            request.email(),
-            request.password(),
-            company
-        );
-    }
-
-    private UserEntity buildUserEntity(
-        String name,
-        String email,
-        String password,
-        CompanyEntity company
-    ) {
-        var user = new UserEntity();
-        user.setName(name);
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setCompany(company);
-        user.setIsActive(true);
-        return user;
-    }
-
-    private CompanyEntity findCompanyOrThrow(UUID companyId) {
-        return companyRepository
-            .findById(companyId)
-            .orElseThrow(() ->
-                new IllegalArgumentException(
-                    "Company not found: " + companyId
-                )
-            );
-=======
         var user = new UserEntity();
         user.setName(request.name());
         user.setEmail(request.email());
@@ -173,7 +139,31 @@ public class AuthService {
         user.assignRole(userRole);
 
         return user;
->>>>>>> 215da15 (fix: enable user registration and improve auth flow)
+    }
+
+    private UserEntity buildUserEntity(
+        String name,
+        String email,
+        String password,
+        CompanyEntity company
+    ) {
+        var user = new UserEntity();
+        user.setName(name);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setCompany(company);
+        user.setIsActive(true);
+        return user;
+    }
+
+    private CompanyEntity findCompanyOrThrow(UUID companyId) {
+        return companyRepository
+            .findById(companyId)
+            .orElseThrow(() ->
+                new IllegalArgumentException(
+                    "Company not found: " + companyId
+                )
+            );
     }
 
     public UserResponse createUser(CreateUserRequest request, UUID companyId) {
