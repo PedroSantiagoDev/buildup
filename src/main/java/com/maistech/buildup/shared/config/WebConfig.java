@@ -1,6 +1,6 @@
 package com.maistech.buildup.shared.config;
 
-import com.maistech.buildup.shared.tenant.TenantInterceptor;
+import com.maistech.buildup.tenant.TenantInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

@@ -1,5 +1,7 @@
 package com.maistech.buildup.shared.config;
 
+import com.maistech.buildup.shared.security.JWTUserData;
+import com.maistech.buildup.auth.config.TokenConfig;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

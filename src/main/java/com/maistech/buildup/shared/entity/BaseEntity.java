@@ -1,7 +1,7 @@
 package com.maistech.buildup.shared.entity;
 
-import com.maistech.buildup.shared.tenant.TenantAware;
-import com.maistech.buildup.shared.tenant.TenantListener;
+import com.maistech.buildup.shared.multitenancy.TenantAware;
+import com.maistech.buildup.shared.multitenancy.TenantListener;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
