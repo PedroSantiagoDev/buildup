@@ -11,13 +11,16 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "projects")
 @Getter
 @Setter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProjectEntity extends BaseEntity {
 
     @NotBlank(message = "Project name is required")
@@ -48,6 +51,7 @@ public class ProjectEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(length = 50, nullable = false)
     @NotNull
+    @Builder.Default
     private ProjectStatus status = ProjectStatus.IN_PROGRESS;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -63,6 +67,7 @@ public class ProjectEntity extends BaseEntity {
         cascade = CascadeType.ALL,
         orphanRemoval = true
     )
+    @Builder.Default
     private List<ProjectMemberEntity> members = new ArrayList<>();
 
     public boolean isOverdue() {

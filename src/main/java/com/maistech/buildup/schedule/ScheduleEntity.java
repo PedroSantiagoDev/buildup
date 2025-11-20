@@ -4,8 +4,8 @@ import com.maistech.buildup.project.ProjectEntity;
 import com.maistech.buildup.shared.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 @Table(name = "schedules")
 @Getter
 @Setter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ScheduleEntity extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -38,15 +41,19 @@ public class ScheduleEntity extends BaseEntity {
     private Integer totalDurationDays;
 
     @Column(name = "completed_percentage")
+    @Builder.Default
     private Integer completedPercentage = 0;
 
     @Column(name = "total_tasks")
+    @Builder.Default
     private Integer totalTasks = 0;
 
     @Column(name = "completed_tasks")
+    @Builder.Default
     private Integer completedTasks = 0;
 
     @Column(name = "overdue_tasks")
+    @Builder.Default
     private Integer overdueTasks = 0;
 
     @Column(name = "critical_path_duration")
@@ -58,9 +65,11 @@ public class ScheduleEntity extends BaseEntity {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private ScheduleStatus status = ScheduleStatus.DRAFT;
 
     @Column(name = "is_on_track")
+    @Builder.Default
     private Boolean isOnTrack = true;
 
     @Column(columnDefinition = "TEXT")

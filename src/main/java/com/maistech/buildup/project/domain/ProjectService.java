@@ -47,18 +47,19 @@ public class ProjectService {
             );
         }
 
-        ProjectEntity project = new ProjectEntity();
-        project.setName(request.name());
-        project.setClientName(request.clientName());
-        project.setDescription(request.description());
-        project.setStartDate(request.startDate());
-        project.setDueDate(request.dueDate());
-        project.setContractValue(request.contractValue());
-        project.setDownPayment(request.downPayment());
-        project.setCoverImageUrl(request.coverImageUrl());
-        project.setStatus(ProjectStatus.IN_PROGRESS);
-        project.setCompanyId(companyId);
-        project.setCreatedBy(creator);
+        ProjectEntity project = ProjectEntity.builder()
+            .name(request.name())
+            .clientName(request.clientName())
+            .description(request.description())
+            .startDate(request.startDate())
+            .dueDate(request.dueDate())
+            .contractValue(request.contractValue())
+            .downPayment(request.downPayment())
+            .coverImageUrl(request.coverImageUrl())
+            .status(ProjectStatus.IN_PROGRESS)
+            .companyId(companyId)
+            .createdBy(creator)
+            .build();
 
         project = projectRepository.save(project);
 

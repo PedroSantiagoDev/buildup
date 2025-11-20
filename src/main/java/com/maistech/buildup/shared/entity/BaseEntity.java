@@ -7,6 +7,9 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
@@ -21,6 +24,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 )
 @Filter(name = "tenantFilter", condition = "company_id = :tenantId")
 @Getter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public abstract class BaseEntity implements TenantAware {
 
     @Id

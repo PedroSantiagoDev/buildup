@@ -21,7 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/companies/{companyId}/projects/{projectId}/tasks")
+@RequestMapping("/projects/{projectId}/tasks")
 @SecurityRequirement(name = "bearer-jwt")
 @Tag(
     name = "Tasks",
@@ -39,7 +39,7 @@ public class TaskController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Create new task",
-        description = "Creates a new task for the project. Tasks can be assigned to multiple users and have priorities, deadlines, and dependencies."
+        description = "Creates a new task for the project. Tasks can be assigned to multiple users and have priorities, deadlines, and dependencies. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -66,18 +66,18 @@ public class TaskController {
         }
     )
     public ResponseEntity<TaskResponse> createTask(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @Valid @RequestBody CreateTaskRequest request,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         TaskResponse task = taskService.createTask(
-            companyId,
+            targetCompanyId,
             projectId,
             userData.userId(),
             request
@@ -90,7 +90,7 @@ public class TaskController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "List project tasks",
-        description = "Returns all tasks for the project including their status, priority, assigned users, and dependencies."
+        description = "Returns all tasks for the project including their status, priority, assigned users, and dependencies. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -109,16 +109,16 @@ public class TaskController {
         }
     )
     public ResponseEntity<List<TaskResponse>> listTasks(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         List<TaskResponse> tasks = taskService.listProjectTasks(
-            companyId,
+            targetCompanyId,
             projectId
         );
         return ResponseEntity.ok(tasks);
@@ -155,7 +155,7 @@ public class TaskController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "List overdue tasks",
-        description = "Returns all tasks that are past their due date and not yet completed."
+        description = "Returns all tasks that are past their due date and not yet completed. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -174,16 +174,16 @@ public class TaskController {
         }
     )
     public ResponseEntity<List<TaskResponse>> listOverdueTasks(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         List<TaskResponse> tasks = taskService.listOverdueTasks(
-            companyId,
+            targetCompanyId,
             projectId
         );
         return ResponseEntity.ok(tasks);
@@ -193,7 +193,7 @@ public class TaskController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "Get task by ID",
-        description = "Returns detailed information about a specific task including assigned users, dependencies, and progress."
+        description = "Returns detailed information about a specific task including assigned users, dependencies, and progress. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -216,18 +216,18 @@ public class TaskController {
         }
     )
     public ResponseEntity<TaskResponse> getTask(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
         @Parameter(description = "Task ID", required = true)
         @PathVariable UUID taskId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         TaskResponse task = taskService.getTaskById(
-            companyId,
+            targetCompanyId,
             projectId,
             taskId
         );
@@ -238,7 +238,7 @@ public class TaskController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Update task",
-        description = "Updates task information. All fields in the request are optional - only provided fields will be updated."
+        description = "Updates task information. All fields in the request are optional - only provided fields will be updated. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -265,19 +265,19 @@ public class TaskController {
         }
     )
     public ResponseEntity<TaskResponse> updateTask(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
         @Parameter(description = "Task ID", required = true)
         @PathVariable UUID taskId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @Valid @RequestBody UpdateTaskRequest request,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         TaskResponse task = taskService.updateTask(
-            companyId,
+            targetCompanyId,
             projectId,
             taskId,
             request
@@ -289,7 +289,7 @@ public class TaskController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Delete task",
-        description = "Permanently deletes a task and all its dependencies. This action cannot be undone."
+        description = "Permanently deletes a task and all its dependencies. This action cannot be undone. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -308,17 +308,17 @@ public class TaskController {
         }
     )
     public ResponseEntity<Void> deleteTask(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
         @Parameter(description = "Task ID", required = true)
         @PathVariable UUID taskId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
-        taskService.deleteTask(companyId, projectId, taskId);
+        taskService.deleteTask(targetCompanyId, projectId, taskId);
         return ResponseEntity.noContent().build();
     }
 
@@ -326,7 +326,7 @@ public class TaskController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "Start task",
-        description = "Changes task status to IN_PROGRESS. Used when work begins on the task."
+        description = "Changes task status to IN_PROGRESS. Used when work begins on the task. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -349,17 +349,17 @@ public class TaskController {
         }
     )
     public ResponseEntity<TaskResponse> startTask(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
         @Parameter(description = "Task ID", required = true)
         @PathVariable UUID taskId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
-        TaskResponse task = taskService.startTask(companyId, projectId, taskId);
+        TaskResponse task = taskService.startTask(targetCompanyId, projectId, taskId);
         return ResponseEntity.ok(task);
     }
 
@@ -367,7 +367,7 @@ public class TaskController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "Complete task",
-        description = "Marks task as COMPLETED and sets progress to 100%. Used when task is finished."
+        description = "Marks task as COMPLETED and sets progress to 100%. Used when task is finished. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -390,18 +390,18 @@ public class TaskController {
         }
     )
     public ResponseEntity<TaskResponse> completeTask(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
         @Parameter(description = "Task ID", required = true)
         @PathVariable UUID taskId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         TaskResponse task = taskService.completeTask(
-            companyId,
+            targetCompanyId,
             projectId,
             taskId
         );
@@ -412,7 +412,7 @@ public class TaskController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "Update task progress",
-        description = "Updates the progress percentage of a task (0-100%). Used to track task completion."
+        description = "Updates the progress percentage of a task (0-100%). Used to track task completion. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -435,19 +435,19 @@ public class TaskController {
         }
     )
     public ResponseEntity<TaskResponse> updateProgress(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
         @Parameter(description = "Task ID", required = true)
         @PathVariable UUID taskId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @Valid @RequestBody UpdateProgressRequest request,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         TaskResponse task = taskService.updateProgress(
-            companyId,
+            targetCompanyId,
             projectId,
             taskId,
             request.progressPercentage()
@@ -460,7 +460,7 @@ public class TaskController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Add task dependency",
-        description = "Creates a dependency relationship between tasks. Types: BLOCKS (this task blocks another), DEPENDS_ON (this task depends on another), RELATED (tasks are related)."
+        description = "Creates a dependency relationship between tasks. Types: BLOCKS (this task blocks another), DEPENDS_ON (this task depends on another), RELATED (tasks are related). SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -483,18 +483,18 @@ public class TaskController {
         }
     )
     public ResponseEntity<Void> addDependency(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
         @Parameter(description = "Task ID", required = true)
         @PathVariable UUID taskId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @Valid @RequestBody AddDependencyRequest request,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
-        taskService.addDependency(companyId, projectId, taskId, request);
+        taskService.addDependency(targetCompanyId, projectId, taskId, request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -502,7 +502,7 @@ public class TaskController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Remove task dependency",
-        description = "Removes a dependency relationship between two tasks."
+        description = "Removes a dependency relationship between two tasks. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -521,25 +521,40 @@ public class TaskController {
         }
     )
     public ResponseEntity<Void> removeDependency(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
         @Parameter(description = "Task ID", required = true)
         @PathVariable UUID taskId,
         @Parameter(description = "Depends On Task ID", required = true)
         @PathVariable UUID dependsOnTaskId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         taskService.removeDependency(
-            companyId,
+            targetCompanyId,
             projectId,
             taskId,
             dependsOnTaskId
         );
         return ResponseEntity.noContent().build();
+    }
+
+    private UUID getTargetCompanyId(Authentication authentication, UUID requestedCompanyId) {
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+        
+        if (requestedCompanyId != null) {
+            if (!userData.isMasterCompany()) {
+                throw new IllegalStateException(
+                    "Only SUPER_ADMIN can access other companies' resources"
+                );
+            }
+            return requestedCompanyId;
+        }
+        
+        return userData.companyId();
     }
 
     private void validateCompanyAccess(

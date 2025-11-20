@@ -25,11 +25,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/companies/{companyId}/projects/{projectId}/expenses")
+@RequestMapping("/projects/{projectId}/expenses")
 @SecurityRequirement(name = "bearer-jwt")
 @Tag(
     name = "Expenses",
-    description = "Financial expense management for construction projects. Track costs, payments, and generate financial reports."
+    description = "Financial expense management for construction projects. Track costs, payments, and generate financial reports. SUPER_ADMIN can optionally specify companyId via query parameter."
 )
 public class ExpenseController {
 
@@ -43,7 +43,7 @@ public class ExpenseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Create new expense",
-        description = "Creates a new expense entry for the project. Supports single payments or installments."
+        description = "Creates a new expense entry for the project. Supports single payments or installments. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -70,16 +70,17 @@ public class ExpenseController {
         }
     )
     public ResponseEntity<ExpenseResponse> createExpense(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @Valid @RequestBody CreateExpenseRequest request,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         ExpenseResponse expense = expenseService.createExpense(
-            companyId,
+            targetCompanyId,
             projectId,
             userData.userId(),
             request
@@ -92,7 +93,7 @@ public class ExpenseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "List project expenses",
-        description = "Returns paginated list of all expenses for the project, ordered by due date (most recent first)."
+        description = "Returns paginated list of all expenses for the project, ordered by due date (most recent first). SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -108,8 +109,9 @@ public class ExpenseController {
         }
     )
     public ResponseEntity<Page<ExpenseResponse>> listExpenses(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @PageableDefault(
             size = 20,
             sort = "dueDate",
@@ -117,10 +119,10 @@ public class ExpenseController {
         ) Pageable pageable,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         Page<ExpenseResponse> expenses = expenseService.listProjectExpenses(
-            companyId,
+            targetCompanyId,
             projectId,
             pageable
         );
@@ -131,7 +133,7 @@ public class ExpenseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "Get expense by ID",
-        description = "Returns detailed information about a specific expense including installments if applicable."
+        description = "Returns detailed information about a specific expense including installments if applicable. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -151,15 +153,16 @@ public class ExpenseController {
         }
     )
     public ResponseEntity<ExpenseResponse> getExpense(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
         @Parameter(description = "Expense ID") @PathVariable UUID expenseId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         ExpenseResponse expense = expenseService.getExpenseById(
-            companyId,
+            targetCompanyId,
             projectId,
             expenseId
         );
@@ -170,7 +173,7 @@ public class ExpenseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Update expense",
-        description = "Updates expense information. All fields are optional - only provided fields will be updated."
+        description = "Updates expense information. All fields are optional - only provided fields will be updated. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -193,16 +196,17 @@ public class ExpenseController {
         }
     )
     public ResponseEntity<ExpenseResponse> updateExpense(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
         @Parameter(description = "Expense ID") @PathVariable UUID expenseId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @Valid @RequestBody UpdateExpenseRequest request,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         ExpenseResponse expense = expenseService.updateExpense(
-            companyId,
+            targetCompanyId,
             projectId,
             expenseId,
             request
@@ -214,7 +218,7 @@ public class ExpenseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Delete expense",
-        description = "Permanently deletes an expense and all associated installments. This action cannot be undone."
+        description = "Permanently deletes an expense and all associated installments. This action cannot be undone. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -233,14 +237,15 @@ public class ExpenseController {
         }
     )
     public ResponseEntity<Void> deleteExpense(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
         @Parameter(description = "Expense ID") @PathVariable UUID expenseId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
-        expenseService.deleteExpense(companyId, projectId, expenseId);
+        expenseService.deleteExpense(targetCompanyId, projectId, expenseId);
         return ResponseEntity.noContent().build();
     }
 
@@ -248,7 +253,7 @@ public class ExpenseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Mark expense as paid",
-        description = "Updates expense status to PAID with payment date and method."
+        description = "Updates expense status to PAID with payment date and method. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -271,16 +276,17 @@ public class ExpenseController {
         }
     )
     public ResponseEntity<ExpenseResponse> markAsPaid(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
         @Parameter(description = "Expense ID") @PathVariable UUID expenseId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @Valid @RequestBody MarkAsPaidRequest request,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         ExpenseResponse expense = expenseService.markAsPaid(
-            companyId,
+            targetCompanyId,
             projectId,
             expenseId,
             request
@@ -292,7 +298,7 @@ public class ExpenseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Cancel expense",
-        description = "Cancels an expense. Cannot cancel already paid expenses."
+        description = "Cancels an expense. Cannot cancel already paid expenses. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -315,15 +321,16 @@ public class ExpenseController {
         }
     )
     public ResponseEntity<ExpenseResponse> cancelExpense(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
         @Parameter(description = "Expense ID") @PathVariable UUID expenseId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         ExpenseResponse expense = expenseService.cancelExpense(
-            companyId,
+            targetCompanyId,
             projectId,
             expenseId
         );
@@ -334,7 +341,7 @@ public class ExpenseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "List overdue expenses",
-        description = "Returns all expenses that are past their due date and not yet paid."
+        description = "Returns all expenses that are past their due date and not yet paid. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -350,14 +357,15 @@ public class ExpenseController {
         }
     )
     public ResponseEntity<List<ExpenseResponse>> listOverdueExpenses(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         List<ExpenseResponse> expenses = expenseService.listOverdueExpenses(
-            companyId,
+            targetCompanyId,
             projectId
         );
         return ResponseEntity.ok(expenses);
@@ -367,7 +375,7 @@ public class ExpenseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "List expenses by category",
-        description = "Returns all expenses for a specific category."
+        description = "Returns all expenses for a specific category. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -383,15 +391,16 @@ public class ExpenseController {
         }
     )
     public ResponseEntity<List<ExpenseResponse>> listExpensesByCategory(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
         @Parameter(description = "Category ID") @PathVariable UUID categoryId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         List<ExpenseResponse> expenses = expenseService.listExpensesByCategory(
-            companyId,
+            targetCompanyId,
             projectId,
             categoryId
         );
@@ -402,7 +411,7 @@ public class ExpenseController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "Get financial summary",
-        description = "Returns comprehensive financial summary including total expenses, paid amounts, pending amounts, breakdown by category, and overdue count."
+        description = "Returns comprehensive financial summary including total expenses, paid amounts, pending amounts, breakdown by category, and overdue count. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -424,33 +433,32 @@ public class ExpenseController {
         }
     )
     public ResponseEntity<FinancialSummaryResponse> getFinancialSummary(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         FinancialSummaryResponse summary = expenseService.getFinancialSummary(
-            companyId,
+            targetCompanyId,
             projectId
         );
         return ResponseEntity.ok(summary);
     }
 
-    private void validateCompanyAccess(
-        Authentication authentication,
-        UUID companyId
-    ) {
+    private UUID getTargetCompanyId(Authentication authentication, UUID requestedCompanyId) {
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
-
-        if (userData.isMasterCompany()) {
-            return;
+        
+        if (requestedCompanyId != null) {
+            if (!userData.isMasterCompany()) {
+                throw new IllegalStateException(
+                    "Only SUPER_ADMIN can access other companies' resources"
+                );
+            }
+            return requestedCompanyId;
         }
-
-        if (!userData.companyId().equals(companyId)) {
-            throw new IllegalStateException(
-                "You can only access expenses from your own company"
-            );
-        }
+        
+        return userData.companyId();
     }
 }

@@ -21,11 +21,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/companies/{companyId}/projects/{projectId}/schedule")
+@RequestMapping("/projects/{projectId}/schedule")
 @SecurityRequirement(name = "bearer-jwt")
 @Tag(
     name = "Schedule & Milestones",
-    description = "Project schedule management including timeline, milestones, and progress tracking."
+    description = "Project schedule management including timeline, milestones, and progress tracking. SUPER_ADMIN can optionally specify companyId via query parameter."
 )
 public class ScheduleController {
 
@@ -39,7 +39,7 @@ public class ScheduleController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Generate project schedule",
-        description = "Generates or regenerates the project schedule based on tasks and their dependencies. Calculates timeline, progress, and critical path."
+        description = "Generates or regenerates the project schedule based on tasks and their dependencies. Calculates timeline, progress, and critical path. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -59,14 +59,15 @@ public class ScheduleController {
         }
     )
     public ResponseEntity<ScheduleResponse> generateSchedule(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         ScheduleResponse schedule = scheduleService.generateSchedule(
-            companyId,
+            targetCompanyId,
             projectId
         );
 
@@ -77,7 +78,7 @@ public class ScheduleController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "Get project schedule",
-        description = "Returns the project schedule with timeline, progress, milestones, and calculated fields."
+        description = "Returns the project schedule with timeline, progress, milestones, and calculated fields. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -93,14 +94,15 @@ public class ScheduleController {
         }
     )
     public ResponseEntity<ScheduleResponse> getSchedule(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         ScheduleResponse schedule = scheduleService.getScheduleByProjectId(
-            companyId,
+            targetCompanyId,
             projectId
         );
 
@@ -111,7 +113,7 @@ public class ScheduleController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Update schedule",
-        description = "Updates schedule information such as dates, status, and notes."
+        description = "Updates schedule information such as dates, status, and notes. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -131,15 +133,16 @@ public class ScheduleController {
         }
     )
     public ResponseEntity<ScheduleResponse> updateSchedule(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @Valid @RequestBody UpdateScheduleRequest request,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         ScheduleResponse schedule = scheduleService.updateSchedule(
-            companyId,
+            targetCompanyId,
             projectId,
             request
         );
@@ -151,7 +154,7 @@ public class ScheduleController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Recalculate schedule",
-        description = "Recalculates schedule metrics based on current task status. Use after updating tasks."
+        description = "Recalculates schedule metrics based on current task status. Use after updating tasks. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -167,14 +170,15 @@ public class ScheduleController {
         }
     )
     public ResponseEntity<ScheduleResponse> recalculateSchedule(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         ScheduleResponse schedule = scheduleService.recalculateSchedule(
-            companyId,
+            targetCompanyId,
             projectId
         );
 
@@ -185,7 +189,7 @@ public class ScheduleController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Create milestone",
-        description = "Creates a new milestone for the project schedule. Milestones mark important dates and deliverables."
+        description = "Creates a new milestone for the project schedule. Milestones mark important dates and deliverables. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -205,15 +209,16 @@ public class ScheduleController {
         }
     )
     public ResponseEntity<MilestoneResponse> createMilestone(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @Valid @RequestBody CreateMilestoneRequest request,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         MilestoneResponse milestone = scheduleService.createMilestone(
-            companyId,
+            targetCompanyId,
             projectId,
             request
         );
@@ -225,7 +230,7 @@ public class ScheduleController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "List project milestones",
-        description = "Returns all milestones for the project ordered by planned date."
+        description = "Returns all milestones for the project ordered by planned date. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -237,14 +242,15 @@ public class ScheduleController {
         }
     )
     public ResponseEntity<List<MilestoneResponse>> listMilestones(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         List<MilestoneResponse> milestones =
-            scheduleService.listProjectMilestones(companyId, projectId);
+            scheduleService.listProjectMilestones(targetCompanyId, projectId);
 
         return ResponseEntity.ok(milestones);
     }
@@ -253,7 +259,7 @@ public class ScheduleController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Update milestone",
-        description = "Updates milestone information including dates, status, and completion percentage."
+        description = "Updates milestone information including dates, status, and completion percentage. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -273,16 +279,17 @@ public class ScheduleController {
         }
     )
     public ResponseEntity<MilestoneResponse> updateMilestone(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
         @Parameter(description = "Milestone ID") @PathVariable UUID milestoneId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @Valid @RequestBody UpdateMilestoneRequest request,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         MilestoneResponse milestone = scheduleService.updateMilestone(
-            companyId,
+            targetCompanyId,
             projectId,
             milestoneId,
             request
@@ -295,7 +302,7 @@ public class ScheduleController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Delete milestone",
-        description = "Permanently deletes a milestone from the project schedule."
+        description = "Permanently deletes a milestone from the project schedule. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -311,14 +318,15 @@ public class ScheduleController {
         }
     )
     public ResponseEntity<Void> deleteMilestone(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
         @Parameter(description = "Project ID") @PathVariable UUID projectId,
         @Parameter(description = "Milestone ID") @PathVariable UUID milestoneId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
-        scheduleService.deleteMilestone(companyId, projectId, milestoneId);
+        scheduleService.deleteMilestone(targetCompanyId, projectId, milestoneId);
 
         return ResponseEntity.noContent().build();
     }
@@ -327,7 +335,7 @@ public class ScheduleController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "List overdue milestones",
-        description = "Returns all milestones that are past their planned date and not completed."
+        description = "Returns all milestones that are past their planned date and not completed. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -339,13 +347,15 @@ public class ScheduleController {
         }
     )
     public ResponseEntity<List<MilestoneResponse>> listOverdueMilestones(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
+        @Parameter(description = "Project ID") @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         List<MilestoneResponse> milestones =
-            scheduleService.listOverdueMilestones(companyId);
+            scheduleService.listOverdueMilestones(targetCompanyId);
 
         return ResponseEntity.ok(milestones);
     }
@@ -354,7 +364,7 @@ public class ScheduleController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "List upcoming milestones",
-        description = "Returns milestones scheduled within the next N days (default 30)."
+        description = "Returns milestones scheduled within the next N days (default 30). SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -366,35 +376,35 @@ public class ScheduleController {
         }
     )
     public ResponseEntity<List<MilestoneResponse>> listUpcomingMilestones(
-        @Parameter(description = "Company ID") @PathVariable UUID companyId,
+        @Parameter(description = "Project ID") @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @Parameter(description = "Number of days to look ahead") @RequestParam(
             required = false,
             defaultValue = "30"
         ) Integer days,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         List<MilestoneResponse> milestones =
-            scheduleService.listUpcomingMilestones(companyId, days);
+            scheduleService.listUpcomingMilestones(targetCompanyId, days);
 
         return ResponseEntity.ok(milestones);
     }
 
-    private void validateCompanyAccess(
-        Authentication authentication,
-        UUID companyId
-    ) {
+    private UUID getTargetCompanyId(Authentication authentication, UUID requestedCompanyId) {
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
-
-        if (userData.isMasterCompany()) {
-            return;
+        
+        if (requestedCompanyId != null) {
+            if (!userData.isMasterCompany()) {
+                throw new IllegalStateException(
+                    "Only SUPER_ADMIN can access other companies' resources"
+                );
+            }
+            return requestedCompanyId;
         }
-
-        if (!userData.companyId().equals(companyId)) {
-            throw new IllegalStateException(
-                "You can only access schedules from your own company"
-            );
-        }
+        
+        return userData.companyId();
     }
 }

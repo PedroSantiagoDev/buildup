@@ -25,7 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/companies/{companyId}/projects")
+@RequestMapping("/projects")
 @SecurityRequirement(name = "bearer-jwt")
 @Tag(
     name = "Projects",
@@ -70,13 +70,11 @@ public class ProjectController {
         }
     )
     public ResponseEntity<ProjectResponse> createProject(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Valid @RequestBody CreateProjectRequest request,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+        UUID companyId = getCompanyId(authentication);
 
         ProjectResponse project = projectService.createProject(
             companyId,
@@ -91,7 +89,7 @@ public class ProjectController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "List all projects",
-        description = "Returns a paginated list of all projects within the company. Results are sorted by creation date (newest first) by default."
+        description = "Returns a paginated list of all projects within the company. Results are sorted by creation date (newest first) by default. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -110,8 +108,8 @@ public class ProjectController {
         }
     )
     public ResponseEntity<Page<ProjectResponse>> listProjects(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @Parameter(description = "Pagination parameters (page, size, sort)")
         @PageableDefault(
             size = 20,
@@ -120,10 +118,10 @@ public class ProjectController {
         ) Pageable pageable,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         Page<ProjectResponse> projects = projectService.listProjects(
-            companyId,
+            targetCompanyId,
             pageable
         );
         return ResponseEntity.ok(projects);
@@ -133,7 +131,7 @@ public class ProjectController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "List user's projects",
-        description = "Returns all projects where the authenticated user is a member."
+        description = "Returns all projects where the authenticated user is a member. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -148,15 +146,15 @@ public class ProjectController {
         }
     )
     public ResponseEntity<List<ProjectResponse>> listMyProjects(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
         JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         List<ProjectResponse> projects = projectService.listUserProjects(
-            companyId,
+            targetCompanyId,
             userData.userId()
         );
 
@@ -167,7 +165,7 @@ public class ProjectController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "Get project by ID",
-        description = "Returns detailed information about a specific project including all members, financial data, and calculated fields."
+        description = "Returns detailed information about a specific project including all members, financial data, and calculated fields. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -190,16 +188,16 @@ public class ProjectController {
         }
     )
     public ResponseEntity<ProjectResponse> getProject(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         ProjectResponse project = projectService.getProjectById(
-            companyId,
+            targetCompanyId,
             projectId
         );
         return ResponseEntity.ok(project);
@@ -209,7 +207,7 @@ public class ProjectController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Update project",
-        description = "Updates project information. All fields in the request are optional - only provided fields will be updated."
+        description = "Updates project information. All fields in the request are optional - only provided fields will be updated. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -236,17 +234,17 @@ public class ProjectController {
         }
     )
     public ResponseEntity<ProjectResponse> updateProject(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @Valid @RequestBody UpdateProjectRequest request,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         ProjectResponse project = projectService.updateProject(
-            companyId,
+            targetCompanyId,
             projectId,
             request
         );
@@ -257,7 +255,7 @@ public class ProjectController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Delete project",
-        description = "Permanently deletes a project and all associated data including members. This action cannot be undone."
+        description = "Permanently deletes a project and all associated data including members. This action cannot be undone. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -276,15 +274,15 @@ public class ProjectController {
         }
     )
     public ResponseEntity<Void> deleteProject(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
-        projectService.deleteProject(companyId, projectId);
+        projectService.deleteProject(targetCompanyId, projectId);
         return ResponseEntity.noContent().build();
     }
 
@@ -292,7 +290,7 @@ public class ProjectController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Add member to project",
-        description = "Adds a user as a member of the project with a specified role and edit permissions. User must belong to the same company."
+        description = "Adds a user as a member of the project with a specified role and edit permissions. User must belong to the same company. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -319,17 +317,17 @@ public class ProjectController {
         }
     )
     public ResponseEntity<ProjectMemberResponse> addMember(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         @Valid @RequestBody AddMemberRequest request,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         ProjectMemberResponse member = projectService.addMember(
-            companyId,
+            targetCompanyId,
             projectId,
             request
         );
@@ -340,7 +338,7 @@ public class ProjectController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
     @Operation(
         summary = "List project members",
-        description = "Returns all members of the project including their roles and permissions."
+        description = "Returns all members of the project including their roles and permissions. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -359,16 +357,16 @@ public class ProjectController {
         }
     )
     public ResponseEntity<List<ProjectMemberResponse>> listMembers(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
         List<ProjectMemberResponse> members = projectService.listMembers(
-            companyId,
+            targetCompanyId,
             projectId
         );
         return ResponseEntity.ok(members);
@@ -378,7 +376,7 @@ public class ProjectController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(
         summary = "Remove member from project",
-        description = "Removes a user from the project. The project creator cannot be removed."
+        description = "Removes a user from the project. The project creator cannot be removed. SUPER_ADMIN can optionally specify companyId via query parameter."
     )
     @ApiResponses(
         value = {
@@ -401,18 +399,38 @@ public class ProjectController {
         }
     )
     public ResponseEntity<Void> removeMember(
-        @Parameter(description = "Company ID", required = true)
-        @PathVariable UUID companyId,
         @Parameter(description = "Project ID", required = true)
         @PathVariable UUID projectId,
         @Parameter(description = "User ID to remove", required = true)
         @PathVariable UUID userId,
+        @Parameter(description = "Company ID (optional, only for SUPER_ADMIN)")
+        @RequestParam(required = false) UUID companyId,
         Authentication authentication
     ) {
-        validateCompanyAccess(authentication, companyId);
+        UUID targetCompanyId = getTargetCompanyId(authentication, companyId);
 
-        projectService.removeMember(companyId, projectId, userId);
+        projectService.removeMember(targetCompanyId, projectId, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    private UUID getCompanyId(Authentication authentication) {
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+        return userData.companyId();
+    }
+
+    private UUID getTargetCompanyId(Authentication authentication, UUID requestedCompanyId) {
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+        
+        if (requestedCompanyId != null) {
+            if (!userData.isMasterCompany()) {
+                throw new IllegalStateException(
+                    "Only SUPER_ADMIN can access other companies' resources"
+                );
+            }
+            return requestedCompanyId;
+        }
+        
+        return userData.companyId();
     }
 
     private void validateCompanyAccess(

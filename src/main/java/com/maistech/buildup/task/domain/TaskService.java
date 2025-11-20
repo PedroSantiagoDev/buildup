@@ -55,33 +55,36 @@ public class TaskService {
                 new IllegalArgumentException("Creator not found")
             );
 
-        TaskEntity task = new TaskEntity();
-        task.setProject(project);
-        task.setName(request.name());
-        task.setDescription(request.description());
-        task.setStartDate(request.startDate());
-        task.setEndDate(request.endDate());
-        task.setDurationDays(request.durationDays());
-        task.setPriority(
-            request.priority() != null
-                ? request.priority()
-                : TaskPriority.MEDIUM
-        );
-        task.setProgressPercentage(
-            request.progressPercentage() != null
-                ? request.progressPercentage()
-                : 0
-        );
-        task.setCreatedBy(creator);
-
+        UserEntity assignedUser = null;
         if (request.assignedTo() != null) {
-            UserEntity assignedUser = userRepository
+            assignedUser = userRepository
                 .findById(request.assignedTo())
                 .orElseThrow(() ->
                     new IllegalArgumentException("Assigned user not found")
                 );
-            task.setAssignedTo(assignedUser);
         }
+
+        TaskEntity task = TaskEntity.builder()
+            .project(project)
+            .name(request.name())
+            .description(request.description())
+            .startDate(request.startDate())
+            .endDate(request.endDate())
+            .durationDays(request.durationDays())
+            .priority(
+                request.priority() != null
+                    ? request.priority()
+                    : TaskPriority.MEDIUM
+            )
+            .progressPercentage(
+                request.progressPercentage() != null
+                    ? request.progressPercentage()
+                    : 0
+            )
+            .createdBy(creator)
+            .assignedTo(assignedUser)
+            .companyId(companyId)
+            .build();
 
         if (
             task.getStartDate() != null &&
