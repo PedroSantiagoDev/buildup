@@ -73,18 +73,16 @@ public class PhaseEntity extends BaseEntity {
 
     @PrePersist
     @PreUpdate
-    private void calculateDuration() {
+    private void prePersistAndUpdate() {
+        // Calculate duration from dates
         if (startDate != null && endDate != null) {
             this.durationDays = (int) java.time.temporal.ChronoUnit.DAYS.between(
                 startDate,
                 endDate
             ) + 1;
         }
-    }
 
-    @PrePersist
-    @PreUpdate
-    private void syncCompanyId() {
+        // Sync company ID from schedule
         if (schedule != null && getCompanyId() == null) {
             setCompanyId(schedule.getCompanyId());
         }
