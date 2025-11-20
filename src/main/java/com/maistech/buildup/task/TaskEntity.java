@@ -10,19 +10,26 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "tasks")
 @Getter
 @Setter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TaskEntity extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     @NotNull
     private ProjectEntity project;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "phase_id")
+    private com.maistech.buildup.schedule.PhaseEntity phase;
 
     @NotBlank(message = "Task name is required")
     @Column(nullable = false)
@@ -43,13 +50,16 @@ public class TaskEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(length = 50, nullable = false)
     @NotNull
+    @Builder.Default
     private TaskStatus status = TaskStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
+    @Builder.Default
     private TaskPriority priority = TaskPriority.MEDIUM;
 
     @Column(name = "progress_percentage")
+    @Builder.Default
     private Integer progressPercentage = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -57,6 +67,7 @@ public class TaskEntity extends BaseEntity {
     private UserEntity assignedTo;
 
     @Column(name = "order_index")
+    @Builder.Default
     private Integer orderIndex = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -68,6 +79,7 @@ public class TaskEntity extends BaseEntity {
         cascade = CascadeType.ALL,
         orphanRemoval = true
     )
+    @Builder.Default
     private List<TaskDependencyEntity> dependencies = new ArrayList<>();
 
     @OneToMany(
@@ -75,6 +87,7 @@ public class TaskEntity extends BaseEntity {
         cascade = CascadeType.ALL,
         orphanRemoval = true
     )
+    @Builder.Default
     private List<TaskDependencyEntity> dependentTasks = new ArrayList<>();
 
     // ============ Domain Logic ============

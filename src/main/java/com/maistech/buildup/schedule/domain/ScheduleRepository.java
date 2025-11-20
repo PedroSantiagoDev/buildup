@@ -16,6 +16,12 @@ public interface ScheduleRepository extends JpaRepository<ScheduleEntity, UUID> 
 
     Optional<ScheduleEntity> findByProjectId(UUID projectId);
 
+    @Query("SELECT s FROM ScheduleEntity s WHERE s.id = :scheduleId AND s.companyId = :companyId")
+    Optional<ScheduleEntity> findByIdAndCompanyId(
+        @Param("scheduleId") UUID scheduleId,
+        @Param("companyId") UUID companyId
+    );
+
     @Query("SELECT s FROM ScheduleEntity s WHERE s.companyId = :companyId")
     List<ScheduleEntity> findAllByCompanyId(@Param("companyId") UUID companyId);
 
