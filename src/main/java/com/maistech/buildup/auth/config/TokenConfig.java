@@ -20,6 +20,7 @@ public class TokenConfig {
 
     private String secret;
     private long expirationSeconds = 3600;
+    private long refreshExpirationSeconds = 604800; // 7 days
 
     public void setSecret(String secret) {
         this.secret = secret;
@@ -27,6 +28,14 @@ public class TokenConfig {
 
     public void setExpirationSeconds(long expirationSeconds) {
         this.expirationSeconds = expirationSeconds;
+    }
+
+    public void setRefreshExpirationSeconds(long refreshExpirationSeconds) {
+        this.refreshExpirationSeconds = refreshExpirationSeconds;
+    }
+
+    public long getRefreshExpirationSeconds() {
+        return refreshExpirationSeconds;
     }
 
     public String generateToken(UserEntity user) {
@@ -80,5 +89,13 @@ public class TokenConfig {
         } catch (JWTVerificationException ex) {
             return Optional.empty();
         }
+    }
+
+    public String generateRefreshToken() {
+        return UUID.randomUUID().toString();
+    }
+
+    public Instant getRefreshTokenExpiration() {
+        return Instant.now().plusSeconds(refreshExpirationSeconds);
     }
 }

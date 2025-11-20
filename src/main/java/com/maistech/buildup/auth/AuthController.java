@@ -4,6 +4,8 @@ import com.maistech.buildup.auth.dto.CreateUserRequest;
 import com.maistech.buildup.auth.domain.AuthService;
 import com.maistech.buildup.auth.dto.LoginRequest;
 import com.maistech.buildup.auth.dto.LoginResponse;
+import com.maistech.buildup.auth.dto.RefreshTokenRequest;
+import com.maistech.buildup.auth.dto.RefreshTokenResponse;
 import com.maistech.buildup.auth.dto.RegisterUserRequest;
 import com.maistech.buildup.auth.dto.RegisterUserResponse;
 import com.maistech.buildup.auth.dto.UserResponse;
@@ -143,5 +145,61 @@ public class AuthController {
             userData.companyId()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/refresh")
+    @Operation(
+        summary = "Refresh access token",
+        description = "Generate new access token and refresh token using a valid refresh token"
+    )
+    @ApiResponses(
+        value = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Tokens refreshed successfully",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = RefreshTokenResponse.class)
+                )
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Invalid or expired refresh token",
+                content = @Content
+            ),
+        }
+    )
+    public ResponseEntity<RefreshTokenResponse> refresh(
+        @Valid @RequestBody RefreshTokenRequest request
+    ) {
+        RefreshTokenResponse response = authService.refreshAccessToken(
+            request.refreshToken()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    @SecurityRequirement(name = "bearer-jwt")
+    @Operation(
+        summary = "User logout",
+        description = "Logout user by revoking all active refresh tokens"
+    )
+    @ApiResponses(
+        value = {
+            @ApiResponse(
+                responseCode = "204",
+                description = "Successfully logged out"
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Unauthorized - invalid or missing token",
+                content = @Content
+            ),
+        }
+    )
+    public ResponseEntity<Void> logout(Authentication authentication) {
+        JWTUserData userData = (JWTUserData) authentication.getPrincipal();
+        authService.logout(userData.userId());
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,13 +1,9 @@
 package com.maistech.buildup.auth.domain;
 
 import com.maistech.buildup.auth.*;
-import com.maistech.buildup.auth.dto.CreateUserRequest;
-import com.maistech.buildup.auth.dto.LoginRequest;
-import com.maistech.buildup.auth.dto.LoginResponse;
-import com.maistech.buildup.auth.dto.RegisterUserRequest;
-import com.maistech.buildup.auth.dto.RegisterUserResponse;
-import com.maistech.buildup.auth.dto.UserResponse;
+import com.maistech.buildup.auth.dto.*;
 import com.maistech.buildup.auth.exception.InvalidPasswordException;
+import com.maistech.buildup.auth.exception.InvalidRefreshTokenException;
 import com.maistech.buildup.auth.exception.UserAlreadyExistsException;
 import com.maistech.buildup.auth.exception.UserNotFoundException;
 import com.maistech.buildup.tenant.CompanyEntity;
@@ -33,6 +29,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final RoleRepository roleRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final TokenConfig tokenConfig;
@@ -41,6 +38,7 @@ public class AuthService {
         UserRepository userRepository,
         CompanyRepository companyRepository,
         RoleRepository roleRepository,
+        RefreshTokenRepository refreshTokenRepository,
         PasswordEncoder passwordEncoder,
         AuthenticationManager authenticationManager,
         TokenConfig tokenConfig
@@ -48,6 +46,7 @@ public class AuthService {
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.roleRepository = roleRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.tokenConfig = tokenConfig;
@@ -69,9 +68,15 @@ public class AuthService {
                 new UserNotFoundException("User not found with id: " + userId)
             );
 
-        var token = tokenConfig.generateToken(user);
+        var accessToken = tokenConfig.generateToken(user);
+        var refreshToken = createRefreshToken(user);
 
-        return new LoginResponse(token, user.getName(), user.getEmail());
+        return new LoginResponse(
+            accessToken,
+            refreshToken.getToken(),
+            user.getName(),
+            user.getEmail()
+        );
     }
 
     public RegisterUserResponse register(RegisterUserRequest request) {
@@ -223,6 +228,62 @@ public class AuthService {
                 .collect(Collectors.toList()),
             user.getIsActive(),
             user.getCreatedAt()
+        );
+    }
+
+    private RefreshTokenEntity createRefreshToken(UserEntity user) {
+        revokeUserRefreshTokens(user.getId());
+
+        String tokenValue = tokenConfig.generateRefreshToken();
+        var expiresAt = tokenConfig.getRefreshTokenExpiration();
+
+        RefreshTokenEntity refreshToken = RefreshTokenEntity.create(
+            user,
+            tokenValue,
+            expiresAt
+        );
+
+        return refreshTokenRepository.save(refreshToken);
+    }
+
+    public RefreshTokenResponse refreshAccessToken(String refreshTokenValue) {
+        RefreshTokenEntity refreshToken = refreshTokenRepository
+            .findByToken(refreshTokenValue)
+            .orElseThrow(() ->
+                new InvalidRefreshTokenException("Invalid refresh token")
+            );
+
+        if (!refreshToken.isValid()) {
+            throw new InvalidRefreshTokenException(
+                "Refresh token is expired or revoked"
+            );
+        }
+
+        UserEntity user = userRepository
+            .findByIdWithCompanyAndRoles(refreshToken.getUser().getId())
+            .orElseThrow(() ->
+                new UserNotFoundException(
+                    "User not found: " + refreshToken.getUser().getId()
+                )
+            );
+
+        String newAccessToken = tokenConfig.generateToken(user);
+        RefreshTokenEntity newRefreshToken = createRefreshToken(user);
+
+        return new RefreshTokenResponse(
+            newAccessToken,
+            newRefreshToken.getToken()
+        );
+    }
+
+    public void logout(UUID userId) {
+        revokeUserRefreshTokens(userId);
+    }
+
+    private void revokeUserRefreshTokens(UUID userId) {
+        refreshTokenRepository.revokeAllUserTokens(
+            userId,
+            java.time.Instant.now()
         );
     }
 }
