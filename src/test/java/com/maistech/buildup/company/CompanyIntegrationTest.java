@@ -7,11 +7,11 @@ import com.maistech.buildup.auth.dto.LoginRequest;
 import com.maistech.buildup.auth.dto.LoginResponse;
 import com.maistech.buildup.tenant.CompanyEntity;
 import com.maistech.buildup.tenant.CompanyRepository;
-import com.maistech.buildup.company.domain.*;
 import com.maistech.buildup.company.dto.AdminUserRequest;
 import com.maistech.buildup.company.dto.CompanyResponse;
 import com.maistech.buildup.company.dto.CreateCompanyRequest;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,7 +160,7 @@ class CompanyIntegrationTest {
 
     @Test
     void shouldGetCompanyById() {
-        var company = createTestCompany("Test Company", "98765432000100");
+        var company = createTestCompany();
 
         HttpHeaders headers = createAuthHeaders(superAdminToken);
         HttpEntity<Void> entity = new HttpEntity<>(headers);
@@ -211,10 +211,11 @@ class CompanyIntegrationTest {
             LoginResponse.class
         );
 
-        return response.getBody().token();
+        Assertions.assertNotNull(response.getBody());
+        return response.getBody().accessToken();
     }
 
-    private CompanyEntity createTestCompany(String name, String document) {
+    private CompanyEntity createTestCompany() {
         var masterCompany = companyRepository
             .findMasterCompany()
             .orElseThrow(() ->
@@ -222,9 +223,9 @@ class CompanyIntegrationTest {
             );
 
         CompanyEntity company = new CompanyEntity();
-        company.setName(name);
-        company.setDocument(document);
-        company.setEmail("test@" + document + ".com");
+        company.setName("Test Company");
+        company.setDocument("98765432000100");
+        company.setEmail("test@" + "98765432000100" + ".com");
         company.setIsActive(true);
         company.setMasterCompany(masterCompany);
 

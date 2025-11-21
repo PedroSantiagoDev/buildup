@@ -14,7 +14,6 @@ import com.maistech.buildup.auth.exception.UserAlreadyExistsException;
 import com.maistech.buildup.auth.config.TokenConfig;
 import com.maistech.buildup.tenant.CompanyEntity;
 import com.maistech.buildup.tenant.CompanyRepository;
-import com.maistech.buildup.role.RoleRepository;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -38,9 +37,6 @@ class AuthServiceTest {
     private CompanyRepository companyRepository;
 
     @Mock
-    private RoleRepository roleRepository;
-
-    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -59,7 +55,6 @@ class AuthServiceTest {
             "password123"
         );
 
-        UUID userId = UUID.randomUUID();
         UserEntity authenticatedUser = new UserEntity();
         authenticatedUser.setEmail("john@example.com");
         authenticatedUser.setName("John Doe");
@@ -84,7 +79,7 @@ class AuthServiceTest {
 
         var response = authService.login(request);
 
-        assertThat(response.token()).isEqualTo("mock-jwt-token");
+        assertThat(response.accessToken()).isEqualTo("mock-jwt-token");
         assertThat(response.email()).isEqualTo("john@example.com");
         assertThat(response.name()).isEqualTo("John Doe");
 

@@ -73,7 +73,7 @@ class LoginIntegrationTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().token()).isNotBlank();
+        assertThat(response.getBody().accessToken()).isNotBlank();
         assertThat(response.getBody().name()).isEqualTo("John Doe");
         assertThat(response.getBody().email()).isEqualTo("john@example.com");
     }

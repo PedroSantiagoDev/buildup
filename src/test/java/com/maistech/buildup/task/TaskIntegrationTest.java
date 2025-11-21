@@ -20,10 +20,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -80,13 +78,12 @@ class TaskIntegrationTest {
     private UUID companyId;
     private UUID userId;
     private UUID projectId;
-    private CompanyEntity company;
     private UserEntity adminUser;
     private ProjectEntity project;
 
     @BeforeEach
     void setUp() {
-        company = new CompanyEntity();
+        CompanyEntity company = new CompanyEntity();
         company.setName("Test Company");
         company.setDocument("12345678000190");
         company.setEmail("test@company.com");
@@ -133,7 +130,8 @@ class TaskIntegrationTest {
             loginRequest,
             LoginResponse.class
         );
-        authToken = loginResponse.getBody().token();
+        Assertions.assertNotNull(loginResponse.getBody());
+        authToken = loginResponse.getBody().accessToken();
     }
 
     @AfterEach
@@ -153,10 +151,10 @@ class TaskIntegrationTest {
             "Develop the new feature X with tests",
             LocalDate.now(),
             LocalDate.now().plusDays(7),
-            Integer.valueOf(7),
+                7,
             TaskPriority.HIGH,
             userId,
-            Integer.valueOf(0)
+                0
         );
 
         HttpHeaders headers = new HttpHeaders();
@@ -361,7 +359,7 @@ class TaskIntegrationTest {
         UUID taskId = createTestTask("Task for Progress");
 
         UpdateProgressRequest progressRequest = new UpdateProgressRequest(
-            Integer.valueOf(75)
+                75
         );
 
         HttpHeaders headers = new HttpHeaders();
@@ -421,10 +419,10 @@ class TaskIntegrationTest {
             task1Id
         );
         assertThat(dependencies).hasSize(1);
-        assertThat(dependencies.get(0).getDependsOnTask().getId()).isEqualTo(
+        assertThat(dependencies.getFirst().getDependsOnTask().getId()).isEqualTo(
             task2Id
         );
-        assertThat(dependencies.get(0).getDependencyType()).isEqualTo(
+        assertThat(dependencies.getFirst().getDependencyType()).isEqualTo(
             DependencyType.FINISH_TO_START
         );
     }
@@ -461,7 +459,7 @@ class TaskIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).hasSizeGreaterThanOrEqualTo(1);
-        assertThat(response.getBody().get(0).isOverdue()).isTrue();
+        assertThat(response.getBody().getFirst().isOverdue()).isTrue();
     }
 
     @Test

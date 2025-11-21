@@ -20,10 +20,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -80,13 +78,12 @@ class ExpenseIntegrationTest {
     private UUID companyId;
     private UUID projectId;
     private UUID categoryId;
-    private CompanyEntity company;
     private UserEntity adminUser;
     private ProjectEntity project;
 
     @BeforeEach
     void setUp() {
-        company = new CompanyEntity();
+        CompanyEntity company = new CompanyEntity();
         company.setName("Test Company");
         company.setDocument("12345678000190");
         company.setEmail("test@company.com");
@@ -138,7 +135,8 @@ class ExpenseIntegrationTest {
                 loginRequest,
                 LoginResponse.class
             );
-        authToken = loginResponse.getBody().token();
+        Assertions.assertNotNull(loginResponse.getBody());
+        authToken = loginResponse.getBody().accessToken();
     }
 
     @AfterEach
@@ -515,7 +513,7 @@ class ExpenseIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).hasSizeGreaterThanOrEqualTo(1);
-        assertThat(response.getBody().get(0).isOverdue()).isTrue();
+        assertThat(response.getBody().getFirst().isOverdue()).isTrue();
     }
 
     @Test
