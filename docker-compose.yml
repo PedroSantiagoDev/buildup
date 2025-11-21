@@ -8,3 +8,11 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=buildup
+  consttroi:
+    build: .
+    image: consttroi
+    container_name: consttroi-app
+    ports:
+      - "8080:8085"
+    env_file:
+      - .env
