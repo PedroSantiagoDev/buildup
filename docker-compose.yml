@@ -13,6 +13,6 @@ services:
     image: consttroi
     container_name: consttroi-app
     ports:
-      - "8080:8085"
+      - "${APP_PORT}:8080"
     env_file:
       - .env
