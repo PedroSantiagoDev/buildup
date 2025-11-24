@@ -15,6 +15,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
 
+    @Value("${server.url}")
+    private String serverUrl;
+
     @Bean
     public OpenAPI customOpenAPI() {
         final String securitySchemeName = "bearer-jwt";
@@ -58,11 +61,8 @@ public class OpenApiConfig {
             .servers(
                 List.of(
                     new Server()
-                        .url("http://localhost:8080")
+                        .url(serverUrl)
                         .description("Development Server"),
-                    new Server()
-                        .url("https://api.buildup.com")
-                        .description("Production Server")
                 )
             )
             .addSecurityItem(
