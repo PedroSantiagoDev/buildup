@@ -50,6 +50,8 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, "/auth/refresh")
                     .permitAll()
+                    .requestMatchers("/api/password/**")
+                    .permitAll()
                     .requestMatchers(HttpMethod.GET, "/dev/**")
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/companies/**")
