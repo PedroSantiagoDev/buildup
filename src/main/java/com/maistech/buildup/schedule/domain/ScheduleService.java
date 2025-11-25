@@ -138,11 +138,27 @@ public class ScheduleService {
         List<TaskEntity> tasks = taskRepository.findByProjectId(projectId);
 
         if (tasks.isEmpty()) {
+            ProjectEntity project = schedule.getProject();
+
+            LocalDate defaultStart = project.getStartDate() != null
+                    ? project.getStartDate()
+                    : LocalDate.now();
+
+            LocalDate defaultEnd = project.getDueDate() != null
+                    ? project.getDueDate()
+                    : defaultStart.plusMonths(3);
+
+            schedule.setStartDate(defaultStart);
+            schedule.setEndDate(defaultEnd);
+            schedule.setTotalDurationDays(
+                    (int) ChronoUnit.DAYS.between(defaultStart, defaultEnd)
+            );
             schedule.setStatus(ScheduleStatus.DRAFT);
             schedule.setTotalTasks(0);
             schedule.setCompletedTasks(0);
             schedule.setOverdueTasks(0);
             schedule.setCompletedPercentage(0);
+            schedule.setIsOnTrack(true);
             return;
         }
 
