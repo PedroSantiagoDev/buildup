@@ -42,4 +42,9 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, UUID> {
     );
 
     boolean existsByIdAndCompanyId(UUID id, UUID companyId);
+
+    @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END " +
+            "FROM ProjectEntity p JOIN p.members m " +
+            "WHERE p.id = :projectId AND m.user.id = :userId")
+    boolean isUserMember(@Param("projectId") UUID projectId, @Param("userId") UUID userId);
 }
